@@ -1,0 +1,9 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Generated screenshots from tools/screenshot_test.gd
+shots/
+
+# macOS
+.DS_Store

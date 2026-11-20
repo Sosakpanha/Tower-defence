@@ -1,0 +1,56 @@
+{
+  "sprites": {
+    "goblin": {
+      "frames": 4,
+      "frame_size": [
+        44,
+        44
+      ],
+      "fps": 8
+    },
+    "ogre": {
+      "frames": 4,
+      "frame_size": [
+        60,
+        60
+      ],
+      "fps": 6
+    }
+  },
+  "warnings": [
+    "Missing source: pipeline/tower_defense_raw/wolf_walk_SOURCE_MISSING.png",
+    "Generated illustrations are not guaranteed seamlessly tileable; review the edge metrics and previews.",
+    "Turret hub positions are estimates; visually verify pivot positions in Godot.",
+    "UI slicing assumes fixed grid/layout; inspect results and adjust if needed."
+  ],
+  "seams": {
+    "tiles/grass_a.png": {
+      "horizontal": {
+        "mean_rgb_difference": 1.74,
+        "max_rgb_difference": 15
+      },
+      "vertical": {
+        "mean_rgb_difference": 2.69,
+        "max_rgb_difference": 38
+      }
+    },
+    "tiles/grass_b.png": {
+      "horizontal": {
+        "mean_rgb_difference": 1.68,
+        "max_rgb_difference": 7
+      },
+      "vertical": {
+        "mean_rgb_difference": 4.54,
+        "max_rgb_difference": 62
+      }
+    },
+    "tiles/path_straight.png": {
+      "mean_rgb_difference": 2.03,
+      "max_rgb_difference": 10
+    },
+    "tiles/path_corner.png": {
+      "mean_rgb_difference": 26.7,
+      "max_rgb_difference": 136
+    }
+  }
+}
