@@ -55,7 +55,7 @@ func _process(delta: float) -> bool:
 			step = 2
 		2:
 			sim_time += delta
-			if sim_time > 6.0:
+			if sim_time > 2.5:
 				wait = 3; step = 3
 		3:
 			shot("02_wave_in_progress")

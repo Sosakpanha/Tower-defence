@@ -26,6 +26,8 @@ var waves := WaveManager.new()
 var hud := Hud.new()
 var buildings := BuildingManager.new()
 var build_menu := BuildMenu.new()
+var day := DayCycle.new()
+var day_banner := DayBanner.new()
 var build_kind := ""          # building type being placed; "" = placing a tower
 
 var lives: int:
@@ -39,10 +41,14 @@ var wave_active: bool:
 func _ready() -> void:
 	Engine.time_scale = 1.0
 	preview.game = self
-	for n in [map, castle, preview, buildings, towers_node, enemies_node, projectiles_node, sfx, waves, hud, build_menu]:
+	for n in [map, castle, preview, buildings, towers_node, enemies_node, projectiles_node, sfx, waves, day, day_banner, hud, build_menu]:
 		add_child(n)
 	waves.setup(pathing, enemies_node)
 	buildings.setup(pathing)
+	day.setup(waves)
+	day.phase_changed.connect(day_banner.show_phase)
+	day.countdown.connect(day_banner.set_countdown)
+	day.night_requested.connect(start_wave)
 	buildings.income.connect(func(n: int) -> void: gold += n; _update_hud())
 	buildings.changed.connect(_update_hud)
 	build_menu.building_chosen.connect(_select_building)

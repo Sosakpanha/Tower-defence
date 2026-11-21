@@ -12,6 +12,8 @@ const START_GOLD := 250
 const CASTLE_HP := 20
 const MAX_WAVE := 20
 const SELL_REFUND := 0.7
+const FIRST_DAY_SECONDS := 45.0  # build time before wave 1
+const DAY_SECONDS := 30.0        # build time between later waves
 const BASE_POP := 4  # population cap before any House
 
 const SPEEDS := [1.0, 2.0, 3.0]
