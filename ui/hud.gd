@@ -12,9 +12,9 @@ signal pause_pressed
 signal restart_pressed
 
 var tower_buttons := {}
-var wave_button := Button.new()
-var speed_button := Button.new()
-var pause_button := Button.new()
+var wave_button := IconButton.new()
+var speed_button := IconButton.new()
+var pause_button := IconButton.new()
 var gold_label := Label.new()
 var lives_label := Label.new()
 var wave_label := Label.new()
@@ -45,7 +45,7 @@ func set_wave_button_disabled(disabled: bool) -> void:
 
 
 func set_speed(multiplier: float) -> void:
-	speed_button.text = "Speed\nx%d" % int(multiplier)
+	speed_button.caption.text = "x%d" % int(multiplier)
 
 
 func set_preview(text: String) -> void:
@@ -87,7 +87,7 @@ func show_pause(paused: bool) -> void:
 		overlay.show_overlay("PAUSED", true, true)
 	else:
 		overlay.visible = false
-	pause_button.text = "Play" if paused else "Pause"
+	pause_button.icon = IconButton.icon_for("play" if paused else "pause")
 
 
 # ---------------------------------------------------------------- Building the UI
@@ -97,33 +97,21 @@ func _build_toolbar() -> void:
 	bar.add_theme_constant_override("separation", 6)
 	add_child(bar)
 	var keys := Tower.TYPES.keys()
-	for i in keys.size():
-		var k: String = keys[i]
+	for k in keys:
 		var t: Dictionary = Tower.TYPES[k]
-		var b := Button.new()
-		b.text = "%s\n$%d" % [t.name, t.cost]
-		b.custom_minimum_size = Vector2(124, UiStyle.TOUCH_H)
-		b.icon = load("res://assets/ui/icons/%s.png" % t.get("art", k))
-		b.expand_icon = true
-		b.add_theme_constant_override("icon_max_width", 28)
-		UiStyle.style_button(b)
+		var b := IconButton.new().setup(t.get("art", k) if k != "cannon" else k, "%s  $%d\n[%d] key" % [t.name, t.cost, keys.find(k) + 1], "$%d" % t.cost)
 		b.pressed.connect(tower_chosen.emit.bind(k))
 		bar.add_child(b)
 		tower_buttons[k] = b
-	wave_button.text = "Start\nWave"
-	wave_button.custom_minimum_size = Vector2(96, UiStyle.TOUCH_H)
-	UiStyle.style_button(wave_button)
-	wave_button.pressed.connect(start_wave_pressed.emit)
-	bar.add_child(wave_button)
-	speed_button.custom_minimum_size = Vector2(88, UiStyle.TOUCH_H)
-	UiStyle.style_button(speed_button)
-	speed_button.pressed.connect(speed_pressed.emit)
-	bar.add_child(speed_button)
-	pause_button.text = "Pause"
-	pause_button.custom_minimum_size = Vector2(88, UiStyle.TOUCH_H)
-	UiStyle.style_button(pause_button)
-	pause_button.pressed.connect(pause_pressed.emit)
-	bar.add_child(pause_button)
+	_add_action(bar, wave_button, "horn", "Start wave now [Space]", start_wave_pressed)
+	_add_action(bar, speed_button, "speed", "Game speed [F]", speed_pressed)
+	_add_action(bar, pause_button, "pause", "Pause", pause_pressed)
+
+
+func _add_action(bar: Control, b: IconButton, icon_name: String, tip: String, sig: Signal) -> void:
+	b.setup(icon_name, tip)
+	b.pressed.connect(sig.emit)
+	bar.add_child(b)
 
 
 func _build_stats() -> void:

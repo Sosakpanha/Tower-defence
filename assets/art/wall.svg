@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><g stroke="#2b1a0d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><ellipse cx="64" cy="114" rx="46" ry="8" fill="#000" opacity=".28" stroke="none"/>
+<rect x="8" y="30" width="112" height="80" rx="4" fill="#9a9a9e"/>
+<path d="M8 50h112M8 70h112M8 90h112M36 30v20M72 30v20M100 50v20M30 70v20M66 70v20M92 90v20M44 90v20" fill="none" stroke-width="3" stroke="#5d5d62"/>
+<path d="M8 30V18h20v12M54 30V18h20v12M100 30V18h20v12" fill="#b4b4b8"/></g></svg>

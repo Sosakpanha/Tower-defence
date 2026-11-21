@@ -4,6 +4,7 @@ extends Node2D
 
 const TEX_GRASS := preload("res://assets/tiles/grass_a.png")
 const TEX_GRASS_B := preload("res://assets/tiles/grass_b.png")
+const TEX_TREE := preload("res://assets/art/tree.svg")
 
 
 func mouse_cell() -> Vector2i:
@@ -35,8 +36,4 @@ func _draw_trees(c: Vector2i, r: Rect2) -> void:
 	if c in Config.SPAWN_CELLS:
 		return
 	var h := (c.x * 73 + c.y * 31) % 5
-	for i in 2:
-		var p := r.position + Vector2(18 + (h + i * 2) % 3 * 14, 20 + i * 24)
-		draw_circle(p + Vector2(2, 4), 17, Color(0, 0, 0, 0.25))
-		draw_circle(p, 16, Color(0.1, 0.38 + 0.05 * i, 0.12))
-		draw_circle(p + Vector2(-4, -4), 9, Color(0.18, 0.5, 0.18))
+	draw_texture_rect(TEX_TREE, Rect2(r.position + Vector2(h * 3 - 6, h % 2 * 6 - 4), Vector2(56, 56)), false)

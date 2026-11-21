@@ -44,7 +44,7 @@ func _process(delta: float) -> bool:
 			m.upgrade_selected(); m.upgrade_selected(); m.upgrade_selected()  # 3rd refused: max level
 			print("UPGRADE level=", m.towers[Vector2i(3, 1)].level, " spent_gold=", g - m.gold, " btn=", m.hud.upgrade_btn.text, " sell=", m.hud.sell_btn.text)
 			m.cycle_speed()
-			print("SPEED ", Engine.time_scale, " ", m.hud.speed_button.text)
+			print("SPEED ", Engine.time_scale, " ", m.hud.speed_button.caption.text)
 			wait = 4; step = 1
 		1:
 			shot("01_upgrade_panel")
