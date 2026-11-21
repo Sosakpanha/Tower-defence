@@ -74,3 +74,30 @@ svg("icon_pause", '''<circle cx="64" cy="64" r="52" fill="#b07a2a"/><rect x="40"
 svg("icon_speed", '''<circle cx="64" cy="64" r="52" fill="#3a6ab0"/><path d="M32 38 62 64 32 90zM64 38 94 64 64 90z" fill="#fff"/>''')
 svg("icon_horn", '''<circle cx="64" cy="64" r="52" fill="#a8342a"/><path d="M30 56 84 30 98 90 30 76z" fill="#f2d27a"/><path d="M98 44l14-8M100 62h16M98 80l14 8" fill="none" stroke-width="4"/>''')
 print("ok")
+
+# ---- cannon tower (64px, turret barrel points right) ------------------------
+svg("cannon_base", '''<circle cx="32" cy="32" r="26" fill="#7a5a38"/><circle cx="32" cy="32" r="18" fill="#5a4026"/>
+<circle cx="32" cy="32" r="6" fill="#3a2a18"/>''', 64, 64)
+svg("cannon_turret", '''<rect x="14" y="20" width="44" height="24" rx="6" fill="#4a505c"/><rect x="50" y="17" width="12" height="30" rx="4" fill="#6a7180"/>
+<circle cx="24" cy="32" r="12" fill="#3a3f4a"/><circle cx="24" cy="32" r="4" fill="#ff8a2a" stroke="none"/>''', 64, 64)
+
+# ---- enemy walk frames (4 each), facing right; flipped in code --------------------------
+def walker(name, size, body, accent, extra):
+    for i in range(4):
+        bob = [0, -2, 0, -2][i] * size / 44
+        s1 = [-1, 0, 1, 0][i] * size * 0.12   # leg swing
+        u = size / 44.0
+        legs = (f'<path d="M{18*u+s1} {34*u}v{8*u}M{28*u-s1} {34*u}v{8*u}" stroke-width="{4*u}" fill="none"/>')
+        svg(f"{name}_{i:02d}", f'<ellipse cx="{22*u}" cy="{size-3*u}" rx="{13*u}" ry="{3*u}" fill="#000" opacity=".25" stroke="none"/>' + legs +
+            f'<g transform="translate(0 {bob})"><ellipse cx="{22*u}" cy="{26*u}" rx="{11*u}" ry="{11*u}" fill="{body}"/>'
+            f'<circle cx="{25*u}" cy="{14*u}" r="{9*u}" fill="{body}"/><circle cx="{29*u}" cy="{13*u}" r="{2.5*u}" fill="#fff" stroke="none"/>'
+            f'<circle cx="{30*u}" cy="{13*u}" r="{1.2*u}" fill="#000" stroke="none"/>{extra(u, accent)}</g>', size, size)
+
+walker("archer", 44, "#4fa0a8", "#2f5f66", lambda u, a:
+    f'<path d="M{16*u} {8*u}l{6*u} {-8*u}l{8*u} {8*u}z" fill="{a}"/><path d="M{36*u} {12*u}q{8*u} {10*u} 0 {22*u}" fill="none" stroke-width="{3*u}"/><path d="M{36*u} {12*u}v{22*u}" stroke-width="{1.5*u}"/>')
+walker("swarm", 32, "#b04a4a", "#e8d0a0", lambda u, a:
+    f'<path d="M{15*u} {8*u}l{-3*u} {-7*u}l{6*u} {4*u}zM{28*u} {8*u}l{3*u} {-7*u}l{-6*u} {4*u}z" fill="{a}"/>')
+walker("boss", 96, "#8a3a4a", "#e8e0c8", lambda u, a:
+    f'<path d="M{13*u} {9*u}l{-6*u} {-10*u}l{10*u} {5*u}zM{32*u} {9*u}l{6*u} {-10*u}l{-10*u} {5*u}z" fill="{a}"/>'
+    f'<rect x="{34*u}" y="{20*u}" width="{4*u}" height="{22*u}" fill="#9aa0aa"/><rect x="{30*u}" y="{26*u}" width="{12*u}" height="{4*u}" fill="#6b4423"/>'
+    f'<path d="M{12*u} {22*u}h{20*u}" stroke="#d9b24a" stroke-width="{3*u}"/>')

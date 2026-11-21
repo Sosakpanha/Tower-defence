@@ -1,14 +1,14 @@
 class_name Enemy
 extends Node2D
 
-## Stats per kind. art/tint/scale reuse the existing goblin/wolf/ogre sprites.
+## Stats per kind. art/tint/scale are PNG sets (goblin/wolf/ogre) or SVG sets (archer/swarm/boss, see tools/gen_art.py).
 const KINDS := {
 	"normal": {"speed": 65.0, "hp": 40.0, "reward": 5, "radius": 16.0, "atk": 8.0, "art": "goblin", "tint": Color.WHITE, "scale": 1.0},
 	"fast": {"speed": 110.0, "hp": 20.0, "reward": 4, "radius": 14.0, "atk": 6.0, "art": "wolf", "tint": Color.WHITE, "scale": 1.0},
 	"tank": {"speed": 40.0, "hp": 120.0, "reward": 12, "radius": 22.0, "atk": 20.0, "art": "ogre", "tint": Color.WHITE, "scale": 1.0},
-	"archer": {"speed": 55.0, "hp": 35.0, "reward": 7, "radius": 14.0, "atk": 6.0, "range": 170.0, "art": "goblin", "tint": Color(0.55, 0.8, 1.0), "scale": 0.9},
-	"swarm": {"speed": 100.0, "hp": 10.0, "reward": 2, "radius": 10.0, "atk": 3.0, "art": "wolf", "tint": Color(0.7, 0.7, 0.7), "scale": 0.6},
-	"boss": {"speed": 32.0, "hp": 500.0, "reward": 120, "radius": 32.0, "atk": 60.0, "art": "ogre", "tint": Color(1.0, 0.45, 0.4), "scale": 1.6},
+	"archer": {"speed": 55.0, "hp": 35.0, "reward": 7, "radius": 14.0, "atk": 6.0, "range": 170.0, "art": "archer", "tint": Color.WHITE, "scale": 1.0},
+	"swarm": {"speed": 100.0, "hp": 10.0, "reward": 2, "radius": 10.0, "atk": 3.0, "art": "swarm", "tint": Color.WHITE, "scale": 1.0},
+	"boss": {"speed": 32.0, "hp": 500.0, "reward": 120, "radius": 32.0, "atk": 60.0, "art": "boss", "tint": Color.WHITE, "scale": 1.0},
 }
 
 signal died(enemy: Enemy)
@@ -57,15 +57,12 @@ func _build_sprite(kind: String) -> void:
 	var art: String = st.art
 	var tint: Color = st.tint
 	var sc: float = st.scale
-	var fps := {"goblin": 8.0, "wolf": 12.0, "ogre": 6.0}
-	# Fallback when an art set is missing: tinted, smaller goblin.
-	if not ResourceLoader.exists("res://assets/enemies/%s/%s_00.png" % [art, art]):
-		art = "goblin"; tint = Color(1.0, 0.85, 0.3); sc *= 0.8
-		fps["goblin"] = 12.0
+	var fps := {"goblin": 8.0, "wolf": 12.0, "ogre": 6.0, "archer": 8.0, "swarm": 12.0, "boss": 5.0}
 	var frames := SpriteFrames.new()
 	frames.set_animation_speed("default", fps[art])
 	for i in 4:
-		frames.add_frame("default", load("res://assets/enemies/%s/%s_%02d.png" % [art, art, i]))
+		var svg := "res://assets/art/%s_%02d.svg" % [art, i]
+		frames.add_frame("default", load(svg if ResourceLoader.exists(svg) else "res://assets/enemies/%s/%s_%02d.png" % [art, art, i]))
 	sprite.sprite_frames = frames
 	base_tint = tint
 	sprite.scale = Vector2(sc, sc)

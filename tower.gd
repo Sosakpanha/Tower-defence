@@ -5,8 +5,8 @@ const TYPES := {
 	"gunner": {"name": "Gunner", "cost": 50, "range": 150.0, "rate": 0.5, "damage": 10.0, "slow": 0.0, "color": Color.DODGER_BLUE, "projectile": "gunner_bolt.png"},
 	"sniper": {"name": "Sniper", "cost": 100, "range": 300.0, "rate": 1.6, "damage": 60.0, "slow": 0.0, "color": Color.FOREST_GREEN, "projectile": "sniper_arrow.png"},
 	"frost": {"name": "Frost", "cost": 75, "range": 130.0, "rate": 0.8, "damage": 4.0, "slow": 1.5, "color": Color.LIGHT_SKY_BLUE, "projectile": "frost_shard.png"},
-	# Splash damage; reuses the gunner art tinted orange until cannon art exists.
-	"cannon": {"name": "Cannon", "cost": 120, "range": 170.0, "rate": 1.8, "damage": 28.0, "slow": 0.0, "splash": 75.0, "color": Color.ORANGE, "projectile": "gunner_bolt.png", "art": "gunner", "tint": Color(1.0, 0.6, 0.25)},
+	# Splash damage.
+	"cannon": {"name": "Cannon", "cost": 120, "range": 170.0, "rate": 1.8, "damage": 28.0, "slow": 0.0, "splash": 75.0, "color": Color.ORANGE, "projectile": "gunner_bolt.png"},
 }
 
 var kind := "gunner"
@@ -32,12 +32,18 @@ func setup(k: String, proj_parent: Node) -> void:
 	projectile_parent = proj_parent
 	var base := Sprite2D.new()
 	var art: String = stats.get("art", k)
-	base.texture = load("res://assets/towers/%s_base.png" % art)
+	base.texture = _tex("%s_base" % art)
 	add_child(base)
 	turret = Sprite2D.new()
-	turret.texture = load("res://assets/towers/%s_turret.png" % art)
+	turret.texture = _tex("%s_turret" % art)
 	turret.modulate = stats.get("tint", Color.WHITE)
 	add_child(turret)
+
+
+## Prefers hand-made SVG art (assets/art), falls back to the PNG tower set.
+func _tex(n: String) -> Texture2D:
+	var svg := "res://assets/art/%s.svg" % n
+	return load(svg if ResourceLoader.exists(svg) else "res://assets/towers/%s.png" % n)
 
 
 func get_damage() -> float:
