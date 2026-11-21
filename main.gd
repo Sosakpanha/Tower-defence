@@ -1,15 +1,9 @@
-## Game rules and input. Everything else lives in its own module:
-##   core/config.gd          constants          systems/wave_manager.gd  waves + spawning
-##   world/game_map.gd       terrain + grid     systems/audio.gd         sound effects
-##   world/castle.gd         the castle + HP    systems/pathing.gd       enemy routes (A*)
-##   world/placement_preview.gd  hover preview  ui/hud.gd                all UI
-##   tower.gd / enemy.gd / projectile.gd        game objects
+## Game rules and input. Everything else lives in its own module (see the table in CLAUDE.md):
+## Main only holds gold/flow rules, routes input and connects the modules' signals.
 extends Node2D
 
 var gold := Config.START_GOLD
 var selected := "gunner"      # tower type to build
-var towers := {}              # Vector2i -> Tower
-var sel_cell := Vector2i(-1, -1)  # tower whose upgrade panel is open
 var speed_idx := 0
 var game_over := false
 var won := false
@@ -18,7 +12,7 @@ var map := GameMap.new()
 var castle := Castle.new()
 var pathing := Pathing.new()
 var preview := PlacementPreview.new()
-var towers_node := Node2D.new()
+var tower_mgr := TowerManager.new()
 var enemies_node := Node2D.new()
 var projectiles_node := Node2D.new()
 var sfx := Sfx.new()
@@ -32,6 +26,10 @@ var day := DayCycle.new()
 var day_banner := DayBanner.new()
 var build_kind := ""          # building type being placed; "" = placing a tower
 
+var towers: Dictionary:
+	get: return tower_mgr.towers
+var sel_cell: Vector2i:
+	get: return tower_mgr.sel_cell
 var lives: int:
 	get: return castle.hp
 var wave: int:
@@ -43,8 +41,9 @@ var wave_active: bool:
 func _ready() -> void:
 	Engine.time_scale = 1.0
 	preview.game = self
-	for n in [map, castle, preview, buildings, towers_node, enemies_node, projectiles_node, sfx, waves, day, day_banner, hud, build_menu, router, lifecycle]:
+	for n in [map, castle, preview, buildings, tower_mgr, enemies_node, projectiles_node, sfx, waves, day, day_banner, hud, build_menu, router, lifecycle]:
 		add_child(n)
+	tower_mgr.setup(pathing, projectiles_node)
 	waves.setup(pathing, enemies_node)
 	buildings.setup(pathing)
 	day.setup(waves)
@@ -155,12 +154,7 @@ func try_place(c: Vector2i) -> void:
 		return
 	gold -= cost
 	sfx.play_sfx("place", -4.0)
-	var t := Tower.new()
-	t.setup(selected, projectiles_node)
-	t.position = Config.cell_center(c)
-	towers_node.add_child(t)
-	towers[c] = t
-	pathing.set_blocked(c, true)
+	tower_mgr.add(selected, c)
 	_update_hud()
 
 
@@ -172,32 +166,19 @@ func try_sell(c: Vector2i) -> void:
 		return
 	if not towers.has(c):
 		return
-	var t: Tower = towers[c]
-	gold += t.sell_value()
+	gold += tower_mgr.remove(c)
 	sfx.play_sfx("sell", -4.0)
-	if c == sel_cell:
-		deselect_tower()
-	t.queue_free()
-	towers.erase(c)
-	pathing.set_blocked(c, false)
 	_update_hud()
 
 
 func select_tower(c: Vector2i) -> void:
-	deselect_tower()
-	sel_cell = c
-	towers[c].show_range = true
-	towers[c].queue_redraw()
+	tower_mgr.select(c)
 	hud.move_tower_panel(Config.cell_center(c) + Vector2(44, -40))
 	_refresh_tower_panel()
 
 
 func deselect_tower() -> void:
-	if towers.has(sel_cell):
-		var t: Tower = towers[sel_cell]
-		t.show_range = false
-		t.queue_redraw()
-	sel_cell = Vector2i(-1, -1)
+	tower_mgr.deselect()
 	hud.hide_tower_panel()
 
 
