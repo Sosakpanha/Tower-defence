@@ -1,6 +1,16 @@
 class_name Enemy
 extends Node2D
 
+## Stats per kind. art/tint/scale reuse the existing goblin/wolf/ogre sprites.
+const KINDS := {
+	"normal": {"speed": 65.0, "hp": 40.0, "reward": 5, "radius": 16.0, "atk": 8.0, "art": "goblin", "tint": Color.WHITE, "scale": 1.0},
+	"fast": {"speed": 110.0, "hp": 20.0, "reward": 4, "radius": 14.0, "atk": 6.0, "art": "wolf", "tint": Color.WHITE, "scale": 1.0},
+	"tank": {"speed": 40.0, "hp": 120.0, "reward": 12, "radius": 22.0, "atk": 20.0, "art": "ogre", "tint": Color.WHITE, "scale": 1.0},
+	"archer": {"speed": 55.0, "hp": 35.0, "reward": 7, "radius": 14.0, "atk": 6.0, "range": 170.0, "art": "goblin", "tint": Color(0.55, 0.8, 1.0), "scale": 0.9},
+	"swarm": {"speed": 100.0, "hp": 10.0, "reward": 2, "radius": 10.0, "atk": 3.0, "art": "wolf", "tint": Color(0.7, 0.7, 0.7), "scale": 0.6},
+	"boss": {"speed": 32.0, "hp": 500.0, "reward": 120, "radius": 32.0, "atk": 60.0, "art": "ogre", "tint": Color(1.0, 0.45, 0.4), "scale": 1.6},
+}
+
 signal died(enemy: Enemy)
 signal reached_end(enemy: Enemy)  # reached the castle
 
@@ -13,7 +23,6 @@ var max_hp := 30.0
 var hp := 30.0
 var reward := 5
 var radius := 12.0
-var color := Color.TOMATO
 var slow_timer := 0.0
 var dead := false
 var kind := "normal"
@@ -21,6 +30,7 @@ var sprite := AnimatedSprite2D.new()
 var base_tint := Color.WHITE
 var atk_damage := 8.0     # damage to buildings per hit
 var atk_cooldown := 0.0
+var atk_range := 0.0      # >0: ranged, shoots buildings in range while walking on
 
 
 func setup(path: Pathing, spawn: Vector2i, kind_name: String, wave: int) -> void:
@@ -29,27 +39,28 @@ func setup(path: Pathing, spawn: Vector2i, kind_name: String, wave: int) -> void
 	position = Config.cell_center(spawn)
 	_repath()
 	pathing.changed.connect(_repath)
-	var scale_hp := 1.0 + wave * 0.35
-	match kind_name:
-		"fast":
-			speed = 110.0; max_hp = 20.0 * scale_hp; reward = 4; radius = 14.0; color = Color.GOLD
-		"tank":
-			speed = 40.0; max_hp = 120.0 * scale_hp; reward = 12; radius = 22.0; color = Color.DARK_ORCHID
-		_:
-			speed = 65.0; max_hp = 40.0 * scale_hp; reward = 5; radius = 16.0; color = Color.TOMATO
+	var st: Dictionary = KINDS.get(kind_name, KINDS.normal)
+	var scale_hp := 1.0 + wave * 0.25 + wave * wave * 0.016
+	speed = st.speed
+	max_hp = st.hp * scale_hp
+	reward = st.reward
+	radius = st.radius
+	atk_damage = st.atk
+	atk_range = st.get("range", 0.0)
 	hp = max_hp
 	_build_sprite(kind)
 	add_to_group("enemies")
 
 
 func _build_sprite(kind: String) -> void:
-	var art: String = {"normal": "goblin", "fast": "wolf", "tank": "ogre"}[kind]
-	var tint := Color.WHITE
-	var sc := 1.0
+	var st: Dictionary = KINDS.get(kind, KINDS.normal)
+	var art: String = st.art
+	var tint: Color = st.tint
+	var sc: float = st.scale
 	var fps := {"goblin": 8.0, "wolf": 12.0, "ogre": 6.0}
-	# Fallback until wolf art exists: tinted, smaller goblin.
+	# Fallback when an art set is missing: tinted, smaller goblin.
 	if not ResourceLoader.exists("res://assets/enemies/%s/%s_00.png" % [art, art]):
-		art = "goblin"; tint = Color(1.0, 0.85, 0.3); sc = 0.8
+		art = "goblin"; tint = Color(1.0, 0.85, 0.3); sc *= 0.8
 		fps["goblin"] = 12.0
 	var frames := SpriteFrames.new()
 	frames.set_animation_speed("default", fps[art])
@@ -111,6 +122,8 @@ func _process(delta: float) -> void:
 	sprite.speed_scale = mult
 	sprite.modulate = base_tint * Color(0.6, 0.9, 1.0) if slow_timer > 0.0 else base_tint
 	atk_cooldown -= delta
+	if atk_range > 0.0:
+		_shoot_nearby()
 	if _attack_blocker():
 		queue_redraw()
 		return
@@ -146,6 +159,25 @@ func _attack_blocker() -> bool:
 		atk_cooldown = 1.0
 		b.take_damage(atk_damage)
 	return true
+
+
+## Ranged raiders shoot the nearest building within `atk_range` while still walking.
+func _shoot_nearby() -> void:
+	if atk_cooldown > 0.0:
+		return
+	var best: Building = null
+	var best_d := atk_range
+	for b in pathing.occupants.values():
+		if not is_instance_valid(b):
+			continue
+		var d := position.distance_to((b as Node2D).position)
+		if d <= best_d:
+			best_d = d
+			best = b as Building
+	if best:
+		atk_cooldown = 1.5
+		best.take_damage(atk_damage)
+		get_tree().call_group("sfx", "play_sfx", "hit", -12.0)
 
 
 func _draw() -> void:
