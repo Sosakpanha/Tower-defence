@@ -43,7 +43,7 @@ func add(kind: String, c: Vector2i) -> void:
 	b.destroyed.connect(_on_destroyed)
 	add_child(b)
 	buildings[c] = b
-	pathing.set_blocked(c, true)
+	pathing.set_building(c, b)
 	changed.emit()
 
 
@@ -54,7 +54,7 @@ func remove(c: Vector2i) -> int:
 	var b: Building = buildings[c]
 	var refund := int(b.stats.cost * Config.SELL_REFUND)
 	buildings.erase(c)
-	pathing.set_blocked(c, false)
+	pathing.set_building(c, null)
 	b.queue_free()
 	changed.emit()
 	return refund
@@ -62,6 +62,6 @@ func remove(c: Vector2i) -> int:
 
 func _on_destroyed(b: Building) -> void:
 	buildings.erase(b.cell)
-	pathing.set_blocked(b.cell, false)
+	pathing.set_building(b.cell, null)
 	destroyed.emit(b)
 	changed.emit()

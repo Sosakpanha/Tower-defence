@@ -19,6 +19,8 @@ var dead := false
 var kind := "normal"
 var sprite := AnimatedSprite2D.new()
 var base_tint := Color.WHITE
+var atk_damage := 8.0     # damage to buildings per hit
+var atk_cooldown := 0.0
 
 
 func setup(path: Pathing, spawn: Vector2i, kind_name: String, wave: int) -> void:
@@ -108,6 +110,10 @@ func _process(delta: float) -> void:
 		mult = 0.5
 	sprite.speed_scale = mult
 	sprite.modulate = base_tint * Color(0.6, 0.9, 1.0) if slow_timer > 0.0 else base_tint
+	atk_cooldown -= delta
+	if _attack_blocker():
+		queue_redraw()
+		return
 	var move := speed * mult * delta
 	while move > 0.0 and target_idx < points.size():
 		var to := points[target_idx] - position
@@ -127,6 +133,19 @@ func _process(delta: float) -> void:
 		reached_end.emit(self)
 		queue_free()
 	queue_redraw()
+
+
+## If the next cell on the route holds a building, stand and hit it. True = blocked.
+func _attack_blocker() -> bool:
+	if target_idx >= points.size():
+		return false
+	var b := pathing.building_at(Config.world_to_cell(points[target_idx])) as Building
+	if b == null:
+		return false
+	if atk_cooldown <= 0.0:
+		atk_cooldown = 1.0
+		b.take_damage(atk_damage)
+	return true
 
 
 func _draw() -> void:

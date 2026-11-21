@@ -5,7 +5,11 @@ extends RefCounted
 
 signal changed
 
+## Path cost of walking "through" a building (enemies must chew through it). Towers stay solid.
+const BUILDING_WEIGHT := 6.0
+
 var grid := AStarGrid2D.new()
+var occupants := {}  # Vector2i -> building node that enemies may attack
 
 
 func _init() -> void:
@@ -18,6 +22,21 @@ func _init() -> void:
 func set_blocked(c: Vector2i, blocked: bool) -> void:
 	grid.set_point_solid(c, blocked)
 	changed.emit()
+
+
+## A building is not solid but expensive: enemies detour if cheap, else attack through it.
+func set_building(c: Vector2i, building: Node) -> void:
+	if building:
+		occupants[c] = building
+	else:
+		occupants.erase(c)
+	grid.set_point_weight_scale(c, BUILDING_WEIGHT if building else 1.0)
+	changed.emit()
+
+
+func building_at(c: Vector2i) -> Node:
+	var b: Node = occupants.get(c)
+	return b if is_instance_valid(b) else null
 
 
 ## World-space waypoints (cell centers) from `from` to the castle. Empty if unreachable.
