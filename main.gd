@@ -24,6 +24,9 @@ var projectiles_node := Node2D.new()
 var sfx := Sfx.new()
 var waves := WaveManager.new()
 var hud := Hud.new()
+var buildings := BuildingManager.new()
+var build_menu := BuildMenu.new()
+var build_kind := ""          # building type being placed; "" = placing a tower
 
 var lives: int:
 	get: return castle.hp
@@ -36,9 +39,13 @@ var wave_active: bool:
 func _ready() -> void:
 	Engine.time_scale = 1.0
 	preview.game = self
-	for n in [map, castle, preview, towers_node, enemies_node, projectiles_node, sfx, waves, hud]:
+	for n in [map, castle, preview, buildings, towers_node, enemies_node, projectiles_node, sfx, waves, hud, build_menu]:
 		add_child(n)
 	waves.setup(pathing, enemies_node)
+	buildings.setup(pathing)
+	buildings.income.connect(func(n: int) -> void: gold += n; _update_hud())
+	buildings.changed.connect(_update_hud)
+	build_menu.building_chosen.connect(_select_building)
 	castle.destroyed.connect(func() -> void: _end_game(false))
 	castle.damaged.connect(func(_hp: int) -> void: _update_hud())
 	waves.wave_started.connect(_on_wave_started)
@@ -56,11 +63,23 @@ func _ready() -> void:
 
 func _select(kind: String) -> void:
 	selected = kind
+	build_kind = ""
 	hud.highlight_tower(kind)
+	build_menu.highlight("")
+
+
+func _select_building(kind: String) -> void:
+	build_kind = kind
+	build_menu.highlight(kind)
+
+
+func selected_cost() -> int:
+	return Buildings.TYPES[build_kind].cost if build_kind != "" else Tower.TYPES[selected].cost
 
 
 func _update_hud() -> void:
 	hud.set_stats(gold, lives, wave)
+	build_menu.set_pop(buildings.pop_used(), buildings.pop_cap())
 	hud.set_wave_button_disabled(wave_active or game_over)
 	hud.set_speed(Config.SPEEDS[speed_idx])
 	if wave_active:
@@ -79,6 +98,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_1: _select("gunner")
 			KEY_2: _select("sniper")
 			KEY_3: _select("frost")
+			KEY_4: _select_building("farm")
+			KEY_5: _select_building("lumber")
+			KEY_6: _select_building("house")
+			KEY_7: _select_building("wall")
 			KEY_SPACE: start_wave()
 			KEY_F: cycle_speed()
 			KEY_U: upgrade_selected()
@@ -104,7 +127,7 @@ func _unhandled_input(event: InputEvent) -> void:
 ## A cell is buildable if it is kingdom ground (not jungle/castle), free, has no enemy
 ## standing on it, and building there still leaves enemies a route to the castle.
 func can_build(c: Vector2i) -> bool:
-	if not Config.in_grid(c) or Config.is_jungle(c) or Config.is_castle(c) or towers.has(c):
+	if not Config.in_grid(c) or Config.is_jungle(c) or Config.is_castle(c) or towers.has(c) or buildings.has(c):
 		return false
 	for e in get_tree().get_nodes_in_group("enemies"):
 		if Config.world_to_cell(e.position) == c:
@@ -115,8 +138,15 @@ func can_build(c: Vector2i) -> bool:
 func try_place(c: Vector2i) -> void:
 	if not can_build(c):
 		return
-	var cost: int = Tower.TYPES[selected].cost
+	var cost := selected_cost()
 	if gold < cost:
+		return
+	if build_kind != "":
+		if not buildings.can_afford_pop(build_kind):
+			return
+		gold -= cost
+		sfx.play_sfx("place", -4.0)
+		buildings.add(build_kind, c)
 		return
 	gold -= cost
 	sfx.play_sfx("place", -4.0)
@@ -130,6 +160,11 @@ func try_place(c: Vector2i) -> void:
 
 
 func try_sell(c: Vector2i) -> void:
+	if buildings.has(c):
+		gold += buildings.remove(c)
+		sfx.play_sfx("sell", -4.0)
+		_update_hud()
+		return
 	if not towers.has(c):
 		return
 	var t: Tower = towers[c]

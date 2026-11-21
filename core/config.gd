@@ -12,6 +12,7 @@ const START_GOLD := 120
 const CASTLE_HP := 20
 const MAX_WAVE := 10
 const SELL_REFUND := 0.7
+const BASE_POP := 4  # population cap before any House
 
 const SPEEDS := [1.0, 2.0, 3.0]
 const KIND_NAMES := {"normal": "Goblin", "fast": "Wolf", "tank": "Ogre"}
