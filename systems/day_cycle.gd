@@ -23,6 +23,14 @@ func setup(waves: WaveManager) -> void:
 	phase_changed.emit(false, 1)
 
 
+## Back to a build phase after loading a save: `cleared` waves are done.
+func resume(cleared: int) -> void:
+	is_night = false
+	time_left = Config.FIRST_DAY_SECONDS if cleared == 0 else Config.DAY_SECONDS
+	enabled = true
+	_set_phase(false, cleared + 1)
+
+
 func _set_phase(night: bool, number: int) -> void:
 	is_night = night
 	_last_sec = -1

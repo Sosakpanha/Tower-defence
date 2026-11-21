@@ -10,6 +10,7 @@ signal upgrade_pressed
 signal sell_pressed
 signal pause_pressed
 signal restart_pressed
+signal menu_pressed
 
 var tower_buttons := {}
 var wave_button := IconButton.new()
@@ -163,4 +164,5 @@ func _build_tower_panel() -> void:
 func _build_message_panel() -> void:
 	overlay.resume_pressed.connect(pause_pressed.emit)
 	overlay.restart_pressed.connect(restart_pressed.emit)
+	overlay.menu_pressed.connect(menu_pressed.emit)
 	add_child(overlay)

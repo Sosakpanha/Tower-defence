@@ -66,14 +66,18 @@ func _ready() -> void:
 	router.tower_tapped.connect(select_tower)
 	router.sell_requested.connect(try_sell)
 	router.ground_tapped.connect(deselect_tower)
-	lifecycle.backgrounded.connect(func() -> void: set_paused(true))
+	lifecycle.backgrounded.connect(func() -> void: autosave(); set_paused(true))
 	hud.pause_pressed.connect(func() -> void: set_paused(not get_tree().paused))
 	hud.restart_pressed.connect(restart)
+	hud.menu_pressed.connect(go_menu)
 	hud.tower_chosen.connect(_select)
 	hud.start_wave_pressed.connect(start_wave)
 	hud.speed_pressed.connect(cycle_speed)
 	hud.upgrade_pressed.connect(upgrade_selected)
 	hud.sell_pressed.connect(func() -> void: try_sell(sel_cell))
+	var saved := SaveGame.take_pending()
+	if not saved.is_empty():
+		SaveGame.restore(self, saved)
 	_select(selected)
 	_update_hud()
 
@@ -225,6 +229,7 @@ func _on_wave_cleared(w: int) -> void:
 	if w >= Config.MAX_WAVE:
 		_end_game(true)
 	_update_hud()
+	autosave()
 
 
 func _on_enemy_killed(e: Enemy) -> void:
@@ -244,6 +249,19 @@ func set_paused(on: bool) -> void:
 	hud.show_pause(on)
 
 
+## Saves only in a build phase (day), never mid-wave or after the game ended.
+func autosave() -> void:
+	if not game_over and not wave_active and not day.is_night:
+		SaveGame.write(self)
+
+
+func go_menu() -> void:
+	autosave()
+	get_tree().paused = false
+	Engine.time_scale = 1.0
+	get_tree().change_scene_to_file("res://menu.tscn")
+
+
 func restart() -> void:
 	get_tree().paused = false
 	get_tree().reload_current_scene()
@@ -251,6 +269,7 @@ func restart() -> void:
 
 func _end_game(victory: bool) -> void:
 	game_over = true
+	SaveGame.clear()
 	router.clear_pending()
 	router.enabled = false
 	won = victory

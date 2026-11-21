@@ -2,7 +2,7 @@
 
 2D kingdom defence (landscape, target: Android first, then iOS). A castle in the middle,
 jungle on the border where enemies spawn; enemies path to the castle (A*) around buildings.
-Everything is built in code; `main.tscn` is just a Node2D with `main.gd`.
+Everything is built in code; `menu.tscn` is the start page, `main.tscn` is just a Node2D with `main.gd`.
 Godot binary: `/Applications/Godot.app/Contents/MacOS/Godot` (not on PATH).
 
 ## Architecture rule: code by module, keep files small
@@ -30,6 +30,8 @@ together. Each concern lives in its own file with a `class_name`, and modules ta
 | `assets/art/*.svg`, `tools/gen_art.py` | Castle, buildings, tree, icons are SVG made by the script: edit it, run `python3 tools/gen_art.py` then `Godot --headless --path . --import`. Preload SVGs (`load()` inside `_draw` rendered gray). |
 | `ui/hud.gd` | ALL UI. Holds no game rules; shows what Main says, emits signals (`tower_chosen`, `upgrade_pressed`, ...). |
 | `systems/tower_manager.gd` | Placed towers, selling, selection/range ring. Main handles gold. |
+| `systems/save_game.gd` | `user://save.json`: autosave at dawn/pause/menu, `restore()` on Continue via `SaveGame.pending`. Test: `tools/save_test.gd`. |
+| `ui/main_menu.gd` + `menu.tscn` | Title screen (main scene): New Game / Continue. Game is `main.tscn`. |
 | `tower.gd`, `enemy.gd`, `projectile.gd` | Game objects. Tower types live in `Tower.TYPES` (optional `splash`, `art`, `tint`); enemy kinds in `Enemy.KINDS`. |
 | `main.gd` | Rules + input + connecting signals. Target: stay under ~250 lines. |
 

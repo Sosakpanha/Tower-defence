@@ -4,16 +4,18 @@ extends Panel
 
 signal restart_pressed
 signal resume_pressed
+signal menu_pressed
 
 var label := Label.new()
 var resume_btn := Button.new()
 var restart_btn := Button.new()
+var menu_btn := Button.new()
 
 
 func _init() -> void:
 	add_theme_stylebox_override("panel", UiStyle.make_style("res://assets/ui/panel.png", 60, 60))
-	position = Vector2(390, 150)
-	size = Vector2(500, 420)
+	position = Vector2(390, 100)
+	size = Vector2(500, 520)
 	visible = false
 	var box := VBoxContainer.new()
 	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -32,12 +34,14 @@ func _init() -> void:
 	box.add_child(label)
 	resume_btn.text = "Resume"
 	restart_btn.text = "Restart"
-	for b in [resume_btn, restart_btn]:
+	menu_btn.text = "Main Menu"
+	for b in [resume_btn, restart_btn, menu_btn]:
 		b.custom_minimum_size = Vector2(0, UiStyle.TOUCH_H)
 		UiStyle.style_button(b, 26)
 		box.add_child(b)
 	resume_btn.pressed.connect(resume_pressed.emit)
 	restart_btn.pressed.connect(restart_pressed.emit)
+	menu_btn.pressed.connect(menu_pressed.emit)
 
 
 func show_overlay(text: String, good: bool, can_resume: bool) -> void:
