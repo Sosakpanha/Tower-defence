@@ -7,3 +7,4 @@ shots/
 
 # macOS
 .DS_Store
+build/

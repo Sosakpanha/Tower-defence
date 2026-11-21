@@ -22,6 +22,8 @@ var projectiles_node := Node2D.new()
 var sfx := Sfx.new()
 var waves := WaveManager.new()
 var hud := Hud.new()
+var router := InputRouter.new()
+var lifecycle := AppLifecycle.new()
 
 var wave: int:
 	get: return waves.wave
@@ -32,13 +34,23 @@ var wave_active: bool:
 func _ready() -> void:
 	Engine.time_scale = 1.0
 	preview.game = self
-	for n in [map, preview, towers_node, enemies_node, projectiles_node, sfx, waves, hud]:
+	for n in [map, preview, towers_node, enemies_node, projectiles_node, sfx, waves, hud, router, lifecycle]:
 		add_child(n)
 	waves.setup(map.path_points, enemies_node)
 	waves.wave_started.connect(_on_wave_started)
 	waves.wave_cleared.connect(_on_wave_cleared)
 	waves.enemy_killed.connect(_on_enemy_killed)
 	waves.enemy_leaked.connect(_on_enemy_leaked)
+	router.map = map
+	router.has_tower = func(c: Vector2i) -> bool: return towers.has(c)
+	router.preview_cell.connect(func(c: Vector2i) -> void: preview.pending = c)
+	router.build_requested.connect(func(c: Vector2i) -> void: deselect_tower(); try_place(c))
+	router.tower_tapped.connect(select_tower)
+	router.sell_requested.connect(try_sell)
+	router.ground_tapped.connect(deselect_tower)
+	lifecycle.backgrounded.connect(func() -> void: set_paused(true))
+	hud.pause_pressed.connect(func() -> void: set_paused(not get_tree().paused))
+	hud.restart_pressed.connect(restart)
 	hud.tower_chosen.connect(_select)
 	hud.start_wave_pressed.connect(start_wave)
 	hud.speed_pressed.connect(cycle_speed)
@@ -77,21 +89,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_F: cycle_speed()
 			KEY_U: upgrade_selected()
 			KEY_ESCAPE: deselect_tower()
-			KEY_R: get_tree().reload_current_scene()
-	if game_over:
-		return
-	if event is InputEventMouseButton and event.pressed:
-		var c := map.mouse_cell()
-		if not Config.in_grid(c):
-			return
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if towers.has(c):
-				select_tower(c)
-			else:
-				deselect_tower()
-				try_place(c)
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			try_sell(c)
+			KEY_R: restart()
 
 
 # ---------------------------------------------------------------- Towers
@@ -200,9 +198,23 @@ func _on_enemy_leaked(_e: Enemy) -> void:
 		_end_game(false)
 
 
+func set_paused(on: bool) -> void:
+	if game_over:
+		return
+	get_tree().paused = on
+	hud.show_pause(on)
+
+
+func restart() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+
 func _end_game(victory: bool) -> void:
 	game_over = true
+	router.clear_pending()
+	router.enabled = false
 	won = victory
-	hud.show_message(("YOU WIN!" if victory else "GAME OVER") + "\n\nPress R to restart", victory)
+	hud.show_message(("YOU WIN!" if victory else "GAME OVER") + "", victory)
 	sfx.play_sfx("win" if victory else "lose")
 	_update_hud()
