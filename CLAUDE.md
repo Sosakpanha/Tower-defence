@@ -15,7 +15,7 @@ together. Each concern lives in its own file with a `class_name`, and modules ta
 |---|---|
 | `core/config.gd` (`Config`) | All shared constants (grid, castle, spawn cells, start gold, castle HP, max wave, speeds). No magic numbers elsewhere. |
 | `systems/pathing.gd` (`Pathing`) | A* routes to the castle; buildings are solid cells; `changed` signal makes enemies re-route; `would_block()` stops players sealing the castle in. |
-| `systems/wave_manager.gd` | What each wave contains, spawn timing. Static `wave_list()` / `describe()`. |
+| `systems/wave_manager.gd` | What each wave contains (endless: count, HP, speed, attack, reward scale with wave), spawn timing. Static `wave_list()` / `describe()`. Enemies reaching the castle stay and hit it until killed; melee ones also hit towers in reach, archers shoot towers/buildings. |
 | `systems/audio.gd` (`Sfx`) | Sound. Play with `get_tree().call_group("sfx", "play_sfx", "name", db)`. |
 | `world/game_map.gd` | Terrain drawing (grass, jungle), grid <-> world conversion. |
 | `core/buildings.gd` (`Buildings`) | `TYPES` table for farm/lumber/house/wall (cost, hp, income, pop_use, pop_cap). Add a building = one entry. |
