@@ -2,11 +2,11 @@ class_name Tower
 extends Node2D
 
 const TYPES := {
-	"gunner": {"name": "Gunner", "cost": 50, "range": 150.0, "rate": 0.5, "damage": 10.0, "slow": 0.0, "color": Color.DODGER_BLUE, "projectile": "gunner_bolt.png"},
-	"sniper": {"name": "Sniper", "cost": 100, "range": 300.0, "rate": 1.6, "damage": 60.0, "slow": 0.0, "color": Color.FOREST_GREEN, "projectile": "sniper_arrow.png"},
-	"frost": {"name": "Frost", "cost": 75, "range": 130.0, "rate": 0.8, "damage": 4.0, "slow": 1.5, "color": Color.LIGHT_SKY_BLUE, "projectile": "frost_shard.png"},
+	"gunner": {"name": "Gunner", "cost": 50, "range": 150.0, "rate": 0.5, "damage": 10.0, "slow": 0.0, "color": Color.DODGER_BLUE},
+	"sniper": {"name": "Sniper", "cost": 100, "range": 300.0, "rate": 1.6, "damage": 60.0, "slow": 0.0, "color": Color.FOREST_GREEN},
+	"frost": {"name": "Frost", "cost": 75, "range": 130.0, "rate": 0.8, "damage": 4.0, "slow": 1.5, "color": Color.LIGHT_SKY_BLUE},
 	# Splash damage.
-	"cannon": {"name": "Cannon", "cost": 120, "range": 170.0, "rate": 1.8, "damage": 28.0, "slow": 0.0, "splash": 75.0, "color": Color.ORANGE, "projectile": "gunner_bolt.png"},
+	"cannon": {"name": "Cannon", "cost": 120, "range": 170.0, "rate": 1.8, "damage": 28.0, "slow": 0.0, "splash": 75.0, "color": Color.ORANGE},
 }
 
 var kind := "gunner"
@@ -100,7 +100,7 @@ func _process(delta: float) -> void:
 			p.splash = stats.get("splash", 0.0)
 			p.color = stats.color
 			recoil = 5.0
-			p.texture = load("res://assets/projectiles/%s" % stats.projectile)
+			p.texture = load("res://assets/art/proj_%s.svg" % kind)
 			projectile_parent.add_child(p)
 			get_tree().call_group("sfx", "play_sfx", "shoot_" + kind, -9.0)
 

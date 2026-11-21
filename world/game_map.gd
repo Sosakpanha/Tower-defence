@@ -2,8 +2,8 @@
 class_name GameMap
 extends Node2D
 
-const TEX_GRASS := preload("res://assets/tiles/grass_a.png")
-const TEX_GRASS_B := preload("res://assets/tiles/grass_b.png")
+const TEX_GRASS := preload("res://assets/art/grass_a.svg")
+const TEX_GRASS_B := preload("res://assets/art/grass_b.svg")
 const TEX_TREE := preload("res://assets/art/tree.svg")
 
 

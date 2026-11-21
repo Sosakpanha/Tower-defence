@@ -101,3 +101,52 @@ walker("boss", 96, "#8a3a4a", "#e8e0c8", lambda u, a:
     f'<path d="M{13*u} {9*u}l{-6*u} {-10*u}l{10*u} {5*u}zM{32*u} {9*u}l{6*u} {-10*u}l{-10*u} {5*u}z" fill="{a}"/>'
     f'<rect x="{34*u}" y="{20*u}" width="{4*u}" height="{22*u}" fill="#9aa0aa"/><rect x="{30*u}" y="{26*u}" width="{12*u}" height="{4*u}" fill="#6b4423"/>'
     f'<path d="M{12*u} {22*u}h{20*u}" stroke="#d9b24a" stroke-width="{3*u}"/>')
+
+# ---- remaining towers ---------------------------------------------------------------
+def tower(name, ring, inner, turret_body):
+    svg(f"{name}_base", f'<circle cx="32" cy="32" r="27" fill="{ring}"/><circle cx="32" cy="32" r="19" fill="{inner}"/>'
+        f'<path d="M32 5v6M32 53v6M5 32h6M53 32h6" stroke-width="5"/>', 64, 64)
+    svg(f"{name}_turret", turret_body, 64, 64)
+
+tower("gunner", "#8a8f99", "#4a78b8", '''<rect x="12" y="22" width="40" height="9" rx="3" fill="#3a3f4a"/><rect x="12" y="33" width="40" height="9" rx="3" fill="#3a3f4a"/>
+<circle cx="24" cy="32" r="13" fill="#5b8fd6"/><circle cx="24" cy="32" r="5" fill="#cfe4ff" stroke-width="2"/>''')
+tower("sniper", "#7a6a4a", "#4f8a4a", '''<rect x="14" y="28" width="48" height="8" rx="3" fill="#2f3a2a"/><rect x="56" y="25" width="6" height="14" rx="2" fill="#555"/>
+<circle cx="24" cy="32" r="12" fill="#5fa85a"/><rect x="22" y="22" width="14" height="6" rx="2" fill="#3a3f4a"/><circle cx="24" cy="32" r="4" fill="#d8f0d0" stroke-width="2"/>''')
+tower("frost", "#9ab8c8", "#5aa8d8", '''<path d="M10 32 24 18 46 32 24 46z" fill="#9ae0ff"/><path d="M46 32 62 28v8z" fill="#cfefff"/>
+<path d="M24 18 32 32 24 46" fill="none" stroke-width="2.5"/><circle cx="24" cy="32" r="4" fill="#fff" stroke="none"/>''')
+
+# ---- projectiles (point right) ---------------------------------------------------------
+svg("proj_gunner", '<circle cx="12" cy="8" r="5" fill="#9fd0ff"/><path d="M2 8h4" stroke-width="3" stroke="#5b8fd6"/>', 18, 16)
+svg("proj_sniper", '<path d="M2 8h22" stroke-width="3" stroke="#6b4423"/><path d="M26 8 18 4v8z" fill="#cfd4da"/><path d="M2 8 0 4M2 8 0 12" stroke-width="2" stroke="#e0e0e0"/>', 28, 16)
+svg("proj_frost", '<path d="M2 8 10 2 22 8 10 14z" fill="#bfeeff"/>', 24, 16)
+svg("proj_cannon", '<circle cx="10" cy="10" r="8" fill="#3a3a3f"/><circle cx="7" cy="7" r="2.5" fill="#8a8a92" stroke="none"/>', 20, 20)
+
+# ---- remaining enemies ---------------------------------------------------------------------
+walker("goblin", 44, "#6fae4a", "#3f6a2a", lambda u, a:
+    f'<path d="M{14*u} {13*u}l{-8*u} {-4*u}l{6*u} {7*u}zM{33*u} {13*u}l{8*u} {-4*u}l{-6*u} {7*u}z" fill="{a}"/>'
+    f'<path d="M{34*u} {24*u}l{6*u} {-10*u}" stroke="#6b4423" stroke-width="{4*u}"/>')
+walker("ogre", 60, "#b8935a", "#6b4423", lambda u, a:
+    f'<rect x="{16*u}" y="{20*u}" width="{14*u}" height="{4*u}" fill="{a}"/><path d="M{14*u} {30*u}h{16*u}" stroke="{a}" stroke-width="{3*u}"/>'
+    f'<path d="M{38*u} {22*u}l{7*u} {-16*u}" stroke="#6b4423" stroke-width="{7*u}"/>')
+for i in range(4):
+    sw = [-3, 0, 3, 0][i]; bob = [0, -1.5, 0, -1.5][i]
+    svg(f"wolf_{i:02d}", f'<ellipse cx="18" cy="33" rx="13" ry="3" fill="#000" opacity=".25" stroke="none"/>'
+        f'<path d="M10 24v9M14 24v9M24 24v9M28 24v9" stroke-width="3.5" fill="none" transform="translate({sw} 0)"/>'
+        f'<g transform="translate(0 {bob})"><ellipse cx="17" cy="19" rx="12" ry="7" fill="#8a8f99"/><path d="M5 17 0 22" stroke-width="3.5" fill="none"/>'
+        f'<circle cx="29" cy="14" r="6" fill="#9a9fa9"/><path d="M33 14l6 3-6 3z" fill="#8a8f99"/><path d="M26 9l1-5 4 4z" fill="#6a6f79"/>'
+        f'<circle cx="30" cy="13" r="1.4" fill="#ffd34a" stroke="none"/></g>', 40, 36)
+
+# ---- grass tiles (flat colour + speckles: tiles seamlessly) ------------------------------
+import random
+def grass(name, base, spots):
+    rnd = random.Random(name)
+    blades = "".join(f'<path d="M{x} {y}l-2 -5M{x} {y}l2 -5" stroke="{spots}" stroke-width="1.5" fill="none"/>' for x, y in
+                     [(rnd.randint(4, 60), rnd.randint(8, 62)) for _ in range(14)])
+    with open(os.path.join(OUT, name + ".svg"), "w") as f:
+        f.write(f'<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="{base}"/>{blades}</svg>')
+grass("grass_a", "#5f9a46", "#7cba5a")
+grass("grass_b", "#548c3e", "#6fae52")
+
+svg("icon_gunner", '<circle cx="64" cy="64" r="52" fill="#3a5f9a" stroke="none"/><rect x="30" y="44" width="68" height="14" rx="5" fill="#cfd4da"/><rect x="30" y="68" width="68" height="14" rx="5" fill="#cfd4da"/><circle cx="46" cy="64" r="20" fill="#5b8fd6"/><circle cx="46" cy="64" r="8" fill="#e6f1ff" stroke-width="3"/>')
+svg("icon_sniper", '<circle cx="64" cy="64" r="52" fill="#3f7a3f" stroke="none"/><rect x="22" y="56" width="88" height="14" rx="5" fill="#cfd4da"/><circle cx="46" cy="64" r="20" fill="#5fa85a"/><circle cx="46" cy="64" r="8" fill="#e0f4d8" stroke-width="3"/><path d="M96 40v48M84 64h24" stroke-width="3" fill="none"/>')
+svg("icon_frost", '<circle cx="64" cy="64" r="52" fill="#3a78a8" stroke="none"/><path d="M64 22 94 64 64 106 34 64z" fill="#bfeeff"/><path d="M64 22v84M34 64h60" stroke-width="3" fill="none"/>')

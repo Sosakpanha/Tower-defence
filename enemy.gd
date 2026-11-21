@@ -1,7 +1,7 @@
 class_name Enemy
 extends Node2D
 
-## Stats per kind. art/tint/scale are PNG sets (goblin/wolf/ogre) or SVG sets (archer/swarm/boss, see tools/gen_art.py).
+## Stats per kind. art/tint/scale are PNG sets (goblin/wolf/ogre) or SVG sets (all kinds now; see tools/gen_art.py).
 const KINDS := {
 	"normal": {"speed": 65.0, "hp": 40.0, "reward": 5, "radius": 16.0, "atk": 8.0, "art": "goblin", "tint": Color.WHITE, "scale": 1.0},
 	"fast": {"speed": 110.0, "hp": 20.0, "reward": 4, "radius": 14.0, "atk": 6.0, "art": "wolf", "tint": Color.WHITE, "scale": 1.0},
