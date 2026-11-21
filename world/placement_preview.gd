@@ -6,6 +6,7 @@ extends Node2D
 const TEX_MARKER := preload("res://assets/tiles/buildable_marker.png")
 
 var game: Node
+var pending := Vector2i(-1, -1)  # touch: cell awaiting a confirming second tap
 
 
 func _process(_delta: float) -> void:
@@ -15,7 +16,7 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	if game == null or game.game_over:
 		return
-	var c: Vector2i = game.map.mouse_cell()
+	var c: Vector2i = pending if Config.in_grid(pending) else game.map.mouse_cell()
 	if not Config.in_grid(c):
 		return
 	var cost: int = Tower.TYPES[game.selected].cost
