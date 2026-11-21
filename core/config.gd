@@ -9,17 +9,18 @@ const ORIGIN := Vector2(0, 80)  # leave room for the HUD bar on top
 const SCREEN := Vector2(1280, 720)
 
 const START_GOLD := 120
-const START_LIVES := 20
+const CASTLE_HP := 20
 const MAX_WAVE := 10
 const SELL_REFUND := 0.7
 
 const SPEEDS := [1.0, 2.0, 3.0]
 const KIND_NAMES := {"normal": "Goblin", "fast": "Wolf", "tank": "Ogre"}
 
-# Path corners in grid cells; enemies walk through these in order.
-const PATH_CELLS: Array[Vector2i] = [
-	Vector2i(0, 2), Vector2i(4, 2), Vector2i(4, 7), Vector2i(9, 7),
-	Vector2i(9, 2), Vector2i(14, 2), Vector2i(14, 7), Vector2i(19, 7),
+# The kingdom: a castle in the middle, jungle on the border where enemies spawn.
+const CASTLE_RECT := Rect2i(9, 4, 2, 2)
+const SPAWN_CELLS: Array[Vector2i] = [
+	Vector2i(0, 2), Vector2i(0, 7), Vector2i(19, 2), Vector2i(19, 7),
+	Vector2i(9, 0), Vector2i(10, 9),
 ]
 
 
@@ -29,3 +30,16 @@ static func cell_center(c: Vector2i) -> Vector2:
 
 static func in_grid(c: Vector2i) -> bool:
 	return c.x >= 0 and c.y >= 0 and c.x < COLS and c.y < ROWS
+
+
+static func world_to_cell(p: Vector2) -> Vector2i:
+	var q := (p - ORIGIN) / TILE
+	return Vector2i(floori(q.x), floori(q.y))
+
+
+static func is_jungle(c: Vector2i) -> bool:
+	return c.x == 0 or c.y == 0 or c.x == COLS - 1 or c.y == ROWS - 1
+
+
+static func is_castle(c: Vector2i) -> bool:
+	return CASTLE_RECT.has_point(c)

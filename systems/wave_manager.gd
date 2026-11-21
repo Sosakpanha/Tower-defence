@@ -11,12 +11,12 @@ var wave := 0
 var active := false
 var queue: Array[String] = []
 var timer := 0.0
-var path_points: Array[Vector2] = []
+var pathing: Pathing
 var enemies_node: Node2D
 
 
-func setup(path: Array[Vector2], enemies_parent: Node2D) -> void:
-	path_points = path
+func setup(path: Pathing, enemies_parent: Node2D) -> void:
+	pathing = path
 	enemies_node = enemies_parent
 
 
@@ -73,7 +73,7 @@ func _process(delta: float) -> void:
 
 func _spawn(kind: String) -> void:
 	var e := Enemy.new()
-	e.setup(path_points, kind, wave)
+	e.setup(pathing, Config.SPAWN_CELLS.pick_random(), kind, wave)
 	e.died.connect(func(en: Enemy) -> void: enemy_killed.emit(en))
 	e.reached_end.connect(func(en: Enemy) -> void: enemy_leaked.emit(en))
 	enemies_node.add_child(e)

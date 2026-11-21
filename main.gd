@@ -1,12 +1,12 @@
 ## Game rules and input. Everything else lives in its own module:
 ##   core/config.gd          constants          systems/wave_manager.gd  waves + spawning
 ##   world/game_map.gd       terrain + grid     systems/audio.gd         sound effects
+##   world/castle.gd         the castle + HP    systems/pathing.gd       enemy routes (A*)
 ##   world/placement_preview.gd  hover preview  ui/hud.gd                all UI
 ##   tower.gd / enemy.gd / projectile.gd        game objects
 extends Node2D
 
 var gold := Config.START_GOLD
-var lives := Config.START_LIVES
 var selected := "gunner"      # tower type to build
 var towers := {}              # Vector2i -> Tower
 var sel_cell := Vector2i(-1, -1)  # tower whose upgrade panel is open
@@ -15,6 +15,8 @@ var game_over := false
 var won := false
 
 var map := GameMap.new()
+var castle := Castle.new()
+var pathing := Pathing.new()
 var preview := PlacementPreview.new()
 var towers_node := Node2D.new()
 var enemies_node := Node2D.new()
@@ -23,6 +25,8 @@ var sfx := Sfx.new()
 var waves := WaveManager.new()
 var hud := Hud.new()
 
+var lives: int:
+	get: return castle.hp
 var wave: int:
 	get: return waves.wave
 var wave_active: bool:
@@ -32,9 +36,11 @@ var wave_active: bool:
 func _ready() -> void:
 	Engine.time_scale = 1.0
 	preview.game = self
-	for n in [map, preview, towers_node, enemies_node, projectiles_node, sfx, waves, hud]:
+	for n in [map, castle, preview, towers_node, enemies_node, projectiles_node, sfx, waves, hud]:
 		add_child(n)
-	waves.setup(map.path_points, enemies_node)
+	waves.setup(pathing, enemies_node)
+	castle.destroyed.connect(func() -> void: _end_game(false))
+	castle.damaged.connect(func(_hp: int) -> void: _update_hud())
 	waves.wave_started.connect(_on_wave_started)
 	waves.wave_cleared.connect(_on_wave_cleared)
 	waves.enemy_killed.connect(_on_enemy_killed)
@@ -95,8 +101,19 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 # ---------------------------------------------------------------- Towers
+## A cell is buildable if it is kingdom ground (not jungle/castle), free, has no enemy
+## standing on it, and building there still leaves enemies a route to the castle.
+func can_build(c: Vector2i) -> bool:
+	if not Config.in_grid(c) or Config.is_jungle(c) or Config.is_castle(c) or towers.has(c):
+		return false
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if Config.world_to_cell(e.position) == c:
+			return false
+	return not pathing.would_block(c)
+
+
 func try_place(c: Vector2i) -> void:
-	if map.is_path(c) or towers.has(c):
+	if not can_build(c):
 		return
 	var cost: int = Tower.TYPES[selected].cost
 	if gold < cost:
@@ -108,6 +125,7 @@ func try_place(c: Vector2i) -> void:
 	t.position = Config.cell_center(c)
 	towers_node.add_child(t)
 	towers[c] = t
+	pathing.set_blocked(c, true)
 	_update_hud()
 
 
@@ -121,6 +139,7 @@ func try_sell(c: Vector2i) -> void:
 		deselect_tower()
 	t.queue_free()
 	towers.erase(c)
+	pathing.set_blocked(c, false)
 	_update_hud()
 
 
@@ -193,11 +212,8 @@ func _on_enemy_killed(e: Enemy) -> void:
 
 
 func _on_enemy_leaked(_e: Enemy) -> void:
-	lives -= 1
 	sfx.play_sfx("leak", -3.0)
-	_update_hud()
-	if lives <= 0:
-		_end_game(false)
+	castle.take_damage(1)
 
 
 func _end_game(victory: bool) -> void:

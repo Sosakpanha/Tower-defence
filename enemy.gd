@@ -2,10 +2,12 @@ class_name Enemy
 extends Node2D
 
 signal died(enemy: Enemy)
-signal reached_end(enemy: Enemy)
+signal reached_end(enemy: Enemy)  # reached the castle
 
+var pathing: Pathing
 var points: Array[Vector2] = []
-var target_idx := 1
+var target_idx := 0
+var _progress := 0.0
 var speed := 60.0
 var max_hp := 30.0
 var hp := 30.0
@@ -19,10 +21,12 @@ var sprite := AnimatedSprite2D.new()
 var base_tint := Color.WHITE
 
 
-func setup(p: Array[Vector2], kind_name: String, wave: int) -> void:
-	points = p
+func setup(path: Pathing, spawn: Vector2i, kind_name: String, wave: int) -> void:
+	pathing = path
 	kind = kind_name
-	position = points[0]
+	position = Config.cell_center(spawn)
+	_repath()
+	pathing.changed.connect(_repath)
 	var scale_hp := 1.0 + wave * 0.35
 	match kind_name:
 		"fast":
@@ -57,10 +61,27 @@ func _build_sprite(kind: String) -> void:
 	add_child(sprite)
 
 
+## Higher = closer to the castle. Towers target the highest.
 func progress() -> float:
+	return _progress
+
+
+## Re-route from the current cell (spawn, or when buildings change).
+func _repath() -> void:
+	var p := pathing.route(Config.world_to_cell(position))
+	if p.is_empty():
+		return
+	points = p
+	target_idx = 0
+
+
+func _remaining() -> float:
 	if target_idx >= points.size():
-		return 1e9
-	return target_idx * 10000.0 - position.distance_to(points[target_idx])
+		return 0.0
+	var d := position.distance_to(points[target_idx])
+	for i in range(target_idx, points.size() - 1):
+		d += points[i].distance_to(points[i + 1])
+	return d
 
 
 func take_damage(amount: float, slow: float = 0.0) -> void:
@@ -100,7 +121,8 @@ func _process(delta: float) -> void:
 			if absf(to.x) > 1.0:
 				sprite.flip_h = to.x < 0.0
 			move = 0.0
-	if target_idx >= points.size():
+	_progress = -_remaining()
+	if target_idx >= points.size() or Config.is_castle(Config.world_to_cell(position)):
 		dead = true
 		reached_end.emit(self)
 		queue_free()

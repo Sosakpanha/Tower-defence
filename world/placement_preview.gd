@@ -1,5 +1,5 @@
 ## Highlights the tile under the mouse and shows tower range circles.
-## `game` is the Main node (needs: map, towers, selected, gold, game_over).
+## `game` is the Main node (needs: map, towers, selected, gold, game_over, can_build).
 class_name PlacementPreview
 extends Node2D
 
@@ -19,7 +19,7 @@ func _draw() -> void:
 	if not Config.in_grid(c):
 		return
 	var cost: int = Tower.TYPES[game.selected].cost
-	var ok: bool = not game.map.is_path(c) and not game.towers.has(c) and game.gold >= cost
+	var ok: bool = game.can_build(c) and game.gold >= cost
 	var r: Rect2 = game.map.cell_rect(c)
 	draw_texture_rect(TEX_MARKER, r, false, Color(1, 1, 1, 0.7))
 	draw_rect(r, Color(0, 1, 0, 0.25) if ok else Color(1, 0, 0, 0.35))

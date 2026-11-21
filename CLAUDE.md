@@ -1,6 +1,8 @@
 # Tower Defence (Godot 4.6, GDScript)
 
-2D tower defence. Everything is built in code; `main.tscn` is just a Node2D with `main.gd`.
+2D kingdom defence (landscape, target: Android first, then iOS). A castle in the middle,
+jungle on the border where enemies spawn; enemies path to the castle (A*) around buildings.
+Everything is built in code; `main.tscn` is just a Node2D with `main.gd`.
 Godot binary: `/Applications/Godot.app/Contents/MacOS/Godot` (not on PATH).
 
 ## Architecture rule: code by module, keep files small
@@ -11,10 +13,12 @@ together. Each concern lives in its own file with a `class_name`, and modules ta
 
 | Where | Owns |
 |---|---|
-| `core/config.gd` (`Config`) | All shared constants (grid, path, start gold/lives, max wave, speeds). No magic numbers elsewhere. |
+| `core/config.gd` (`Config`) | All shared constants (grid, castle, spawn cells, start gold, castle HP, max wave, speeds). No magic numbers elsewhere. |
+| `systems/pathing.gd` (`Pathing`) | A* routes to the castle; buildings are solid cells; `changed` signal makes enemies re-route; `would_block()` stops players sealing the castle in. |
 | `systems/wave_manager.gd` | What each wave contains, spawn timing. Static `wave_list()` / `describe()`. |
 | `systems/audio.gd` (`Sfx`) | Sound. Play with `get_tree().call_group("sfx", "play_sfx", "name", db)`. |
-| `world/game_map.gd` | Terrain drawing, grid <-> world conversion, `is_path()`. |
+| `world/game_map.gd` | Terrain drawing (grass, jungle), grid <-> world conversion. |
+| `world/castle.gd` | The castle: HP, `damaged`/`destroyed` signals, drawing. |
 | `world/placement_preview.gd` | Hover highlight and range ring. |
 | `ui/hud.gd` | ALL UI. Holds no game rules; shows what Main says, emits signals (`tower_chosen`, `upgrade_pressed`, ...). |
 | `tower.gd`, `enemy.gd`, `projectile.gd` | Game objects. Tower types live in `Tower.TYPES`. |
@@ -25,7 +29,9 @@ Rules of thumb:
 - A file passing ~200 lines or doing two jobs should be split.
 - UI code goes in `ui/`, never in `main.gd` or game objects. Constants go in `Config`.
 - Add a tower: one entry in `Tower.TYPES` (HUD button/hotkey label pick it up). Change difficulty:
-  `WaveManager.wave_list()`. New map: `Config.PATH_CELLS`.
+  `WaveManager.wave_list()`. New map: `Config.CASTLE_RECT` / `SPAWN_CELLS` / jungle rule in `Config.is_jungle`.
+- New `class_name` files: run `Godot --headless --path . --import` once, or other scripts fail with "Identifier not declared".
+- macOS has no `timeout` command; run the screenshot test with `&` + `sleep`, then read the log.
 - Typed GDScript. Use `var x: bool = ...` when `:=` can't infer (Variant), a common parse error.
 - Other threads/tools may edit files at the same time: re-read a file right before editing it.
 
