@@ -5,6 +5,8 @@ const TYPES := {
 	"gunner": {"name": "Gunner", "cost": 50, "range": 150.0, "rate": 0.5, "damage": 10.0, "slow": 0.0, "color": Color.DODGER_BLUE, "projectile": "gunner_bolt.png"},
 	"sniper": {"name": "Sniper", "cost": 100, "range": 300.0, "rate": 1.6, "damage": 60.0, "slow": 0.0, "color": Color.FOREST_GREEN, "projectile": "sniper_arrow.png"},
 	"frost": {"name": "Frost", "cost": 75, "range": 130.0, "rate": 0.8, "damage": 4.0, "slow": 1.5, "color": Color.LIGHT_SKY_BLUE, "projectile": "frost_shard.png"},
+	# Splash damage; reuses the gunner art tinted orange until cannon art exists.
+	"cannon": {"name": "Cannon", "cost": 120, "range": 170.0, "rate": 1.8, "damage": 28.0, "slow": 0.0, "splash": 75.0, "color": Color.ORANGE, "projectile": "gunner_bolt.png", "art": "gunner", "tint": Color(1.0, 0.6, 0.25)},
 }
 
 var kind := "gunner"
@@ -29,10 +31,12 @@ func setup(k: String, proj_parent: Node) -> void:
 	spent = stats.cost
 	projectile_parent = proj_parent
 	var base := Sprite2D.new()
-	base.texture = load("res://assets/towers/%s_base.png" % k)
+	var art: String = stats.get("art", k)
+	base.texture = load("res://assets/towers/%s_base.png" % art)
 	add_child(base)
 	turret = Sprite2D.new()
-	turret.texture = load("res://assets/towers/%s_turret.png" % k)
+	turret.texture = load("res://assets/towers/%s_turret.png" % art)
+	turret.modulate = stats.get("tint", Color.WHITE)
 	add_child(turret)
 
 
@@ -87,6 +91,7 @@ func _process(delta: float) -> void:
 			p.target = best
 			p.damage = get_damage()
 			p.slow = stats.slow
+			p.splash = stats.get("splash", 0.0)
 			p.color = stats.color
 			recoil = 5.0
 			p.texture = load("res://assets/projectiles/%s" % stats.projectile)

@@ -112,7 +112,7 @@ func _style_button(b: Button) -> void:
 	b.add_theme_color_override("font_disabled_color", Color(0.75, 0.65, 0.5))
 	b.add_theme_color_override("font_outline_color", Color(0.2, 0.1, 0.03))
 	b.add_theme_constant_override("outline_size", 5)
-	b.add_theme_font_size_override("font_size", 16)
+	b.add_theme_font_size_override("font_size", 14)
 
 
 # ---------------------------------------------------------------- Building the UI
@@ -127,8 +127,8 @@ func _build_toolbar() -> void:
 		var t: Dictionary = Tower.TYPES[k]
 		var b := Button.new()
 		b.text = "[%d] %s  $%d" % [i + 1, t.name, t.cost]
-		b.custom_minimum_size = Vector2(168, 56)
-		b.icon = load("res://assets/ui/icons/%s.png" % k)
+		b.custom_minimum_size = Vector2(120, 56)
+		b.icon = load("res://assets/ui/icons/%s.png" % t.get("art", k))
 		b.expand_icon = true
 		b.add_theme_constant_override("icon_max_width", 30)
 		_style_button(b)
@@ -136,11 +136,11 @@ func _build_toolbar() -> void:
 		bar.add_child(b)
 		tower_buttons[k] = b
 	wave_button.text = "Start Wave [Space]"
-	wave_button.custom_minimum_size = Vector2(176, 56)
+	wave_button.custom_minimum_size = Vector2(150, 56)
 	_style_button(wave_button)
 	wave_button.pressed.connect(start_wave_pressed.emit)
 	bar.add_child(wave_button)
-	speed_button.custom_minimum_size = Vector2(110, 56)
+	speed_button.custom_minimum_size = Vector2(100, 56)
 	_style_button(speed_button)
 	speed_button.pressed.connect(speed_pressed.emit)
 	bar.add_child(speed_button)
@@ -181,7 +181,7 @@ func _build_tower_panel() -> void:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
 	tower_panel.add_child(box)
-	panel_label.add_theme_font_size_override("font_size", 16)
+	panel_label.add_theme_font_size_override("font_size", 14)
 	box.add_child(panel_label)
 	for b in [upgrade_btn, sell_btn]:
 		b.custom_minimum_size = Vector2(170, 38)

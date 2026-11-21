@@ -28,7 +28,7 @@ func _process(delta: float) -> bool:
 	match step:
 		0:
 			m.gold = 1000
-			var kinds := ["gunner", "sniper", "frost", "gunner", "sniper"]
+			var kinds := ["gunner", "sniper", "frost", "gunner", "cannon"]
 			var cells := [Vector2i(3, 1), Vector2i(7, 3), Vector2i(2, 4), Vector2i(8, 6), Vector2i(12, 3)]
 			for i in cells.size():
 				m._select(kinds[i]); m.try_place(cells[i])

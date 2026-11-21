@@ -19,7 +19,7 @@ func _ready() -> void:
 		var k: String = keys[i]
 		var t: Dictionary = Buildings.TYPES[k]
 		var b := Button.new()
-		b.text = "[%d] %s $%d" % [i + 4, t.name, t.cost]
+		b.text = "[%d] %s $%d" % [i + 1 + Tower.TYPES.size(), t.name, t.cost]
 		b.custom_minimum_size = Vector2(150, 46)
 		b.focus_mode = Control.FOCUS_NONE
 		b.pressed.connect(building_chosen.emit.bind(k))
