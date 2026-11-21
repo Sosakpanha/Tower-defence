@@ -58,7 +58,7 @@ func _process(_d: float) -> bool:
 			shot("touch_02_upgrade_panel")
 			tap(Config.cell_center(Vector2i(10, 0))); wait = 2; step = 5   # free cell: preview + deselect? panel stays until build
 		5:
-			tap(Vector2(700, 78)); wait = 2; step = 6   # strip above the grid
+			tap(Vector2(1100, 78)); wait = 2; step = 6   # empty strip of the top bar, right of the buttons
 		6:
 			ok("tap outside grid deselects", m.sel_cell == Vector2i(-1, -1) and not m.hud.tower_panel.visible)
 			tap(m.hud.pause_button.get_global_rect().get_center()); wait = 2; step = 7

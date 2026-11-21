@@ -27,11 +27,16 @@ func _process(delta: float) -> bool:
 		return false
 	match step:
 		0:
-			m.gold = 600
-			var kinds := ["gunner", "sniper", "frost", "gunner", "sniper"]
+			m.gold = 1000
+			var kinds := ["gunner", "sniper", "frost", "gunner", "cannon"]
 			var cells := [Vector2i(3, 1), Vector2i(7, 3), Vector2i(2, 4), Vector2i(8, 6), Vector2i(12, 3)]
 			for i in cells.size():
 				m._select(kinds[i]); m.try_place(cells[i])
+			m._select_building("house"); m.try_place(Vector2i(5, 7))
+			m._select_building("farm"); m.try_place(Vector2i(6, 7)); m.try_place(Vector2i(7, 7))
+			m._select_building("lumber"); m.try_place(Vector2i(8, 8))
+			m._select_building("wall"); m.try_place(Vector2i(4, 4)); m.try_place(Vector2i(4, 5))
+			print("BUILDINGS count=", m.buildings.buildings.size(), " pop=", m.buildings.pop_used(), "/", m.buildings.pop_cap())
 			m._select("gunner")
 			print("PREVIEW ", m.hud.preview_label.text)
 			m.select_tower(Vector2i(3, 1))
@@ -50,7 +55,7 @@ func _process(delta: float) -> bool:
 			step = 2
 		2:
 			sim_time += delta
-			if sim_time > 6.0:
+			if sim_time > 2.5:
 				wait = 3; step = 3
 		3:
 			shot("02_wave_in_progress")

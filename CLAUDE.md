@@ -18,10 +18,16 @@ together. Each concern lives in its own file with a `class_name`, and modules ta
 | `systems/wave_manager.gd` | What each wave contains, spawn timing. Static `wave_list()` / `describe()`. |
 | `systems/audio.gd` (`Sfx`) | Sound. Play with `get_tree().call_group("sfx", "play_sfx", "name", db)`. |
 | `world/game_map.gd` | Terrain drawing (grass, jungle), grid <-> world conversion. |
+| `core/buildings.gd` (`Buildings`) | `TYPES` table for farm/lumber/house/wall (cost, hp, income, pop_use, pop_cap). Add a building = one entry. |
+| `world/building.gd` / `world/building_manager.gd` | A placed building (HP, income timer, drawing) / registry + population cap; buildings are high-cost (not solid) path cells that enemies attack through. |
+| `world/float_text.gd` | `FloatText.spawn()` rising "+N" text. |
+| `systems/day_cycle.gd` | Day (build countdown) -> night (wave). Signals only; Main starts the wave on `night_requested`. |
+| `ui/build_menu.gd`, `ui/day_banner.gd` | Building buttons + population readout; night overlay + Day/Night banner + countdown. |
+| `tools/balance_test.gd` | Headless bot: `Godot --headless --path . --fixed-fps 60 --script tools/balance_test.gd` prints gold/castle HP per wave. `tools/attack_test.gd` checks enemies chew through walls. |
 | `world/castle.gd` | The castle: HP, `damaged`/`destroyed` signals, drawing. |
 | `world/placement_preview.gd` | Hover highlight and range ring. |
 | `ui/hud.gd` | ALL UI. Holds no game rules; shows what Main says, emits signals (`tower_chosen`, `upgrade_pressed`, ...). |
-| `tower.gd`, `enemy.gd`, `projectile.gd` | Game objects. Tower types live in `Tower.TYPES`. |
+| `tower.gd`, `enemy.gd`, `projectile.gd` | Game objects. Tower types live in `Tower.TYPES` (optional `splash`, `art`, `tint`); enemy kinds in `Enemy.KINDS`. |
 | `main.gd` | Rules + input + connecting signals. Target: stay under ~250 lines. |
 
 Rules of thumb:

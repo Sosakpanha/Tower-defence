@@ -8,13 +8,16 @@ const ROWS := 10
 const ORIGIN := Vector2(0, 80)  # leave room for the HUD bar on top
 const SCREEN := Vector2(1280, 720)
 
-const START_GOLD := 120
+const START_GOLD := 250
 const CASTLE_HP := 20
-const MAX_WAVE := 10
+const MAX_WAVE := 20
 const SELL_REFUND := 0.7
+const FIRST_DAY_SECONDS := 45.0  # build time before wave 1
+const DAY_SECONDS := 30.0        # build time between later waves
+const BASE_POP := 4  # population cap before any House
 
 const SPEEDS := [1.0, 2.0, 3.0]
-const KIND_NAMES := {"normal": "Goblin", "fast": "Wolf", "tank": "Ogre"}
+const KIND_NAMES := {"normal": "Goblin", "fast": "Wolf", "tank": "Ogre", "archer": "Archer", "swarm": "Rat", "boss": "Warlord"}
 
 # The kingdom: a castle in the middle, jungle on the border where enemies spawn.
 const CASTLE_RECT := Rect2i(9, 4, 2, 2)

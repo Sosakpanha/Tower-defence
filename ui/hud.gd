@@ -103,7 +103,7 @@ func _build_toolbar() -> void:
 		var b := Button.new()
 		b.text = "%s\n$%d" % [t.name, t.cost]
 		b.custom_minimum_size = Vector2(124, UiStyle.TOUCH_H)
-		b.icon = load("res://assets/ui/icons/%s.png" % k)
+		b.icon = load("res://assets/ui/icons/%s.png" % t.get("art", k))
 		b.expand_icon = true
 		b.add_theme_constant_override("icon_max_width", 28)
 		UiStyle.style_button(b)
@@ -161,7 +161,7 @@ func _build_tower_panel() -> void:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
 	tower_panel.add_child(box)
-	panel_label.add_theme_font_size_override("font_size", 16)
+	panel_label.add_theme_font_size_override("font_size", 14)
 	box.add_child(panel_label)
 	for b in [upgrade_btn, sell_btn]:
 		b.custom_minimum_size = Vector2(200, 64)

@@ -19,7 +19,7 @@ func _draw() -> void:
 	var c: Vector2i = pending if Config.in_grid(pending) else game.map.mouse_cell()
 	if not Config.in_grid(c):
 		return
-	var cost: int = Tower.TYPES[game.selected].cost
+	var cost: int = game.selected_cost()
 	var ok: bool = game.can_build(c) and game.gold >= cost
 	var r: Rect2 = game.map.cell_rect(c)
 	draw_texture_rect(TEX_MARKER, r, false, Color(1, 1, 1, 0.7))
@@ -27,5 +27,5 @@ func _draw() -> void:
 	var ring := Color(1, 1, 1, 0.5)
 	if game.towers.has(c):
 		draw_arc(Config.cell_center(c), game.towers[c].get_range(), 0, TAU, 64, ring, 2.0)
-	elif ok:
+	elif ok and game.build_kind == "":
 		draw_arc(Config.cell_center(c), Tower.TYPES[game.selected].range, 0, TAU, 64, ring, 2.0)
