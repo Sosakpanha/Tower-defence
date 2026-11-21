@@ -72,7 +72,7 @@ func _process(_d: float) -> bool:
 		9:
 			ok("backgrounding pauses", paused)
 			m.set_paused(false)
-			m._end_game(false); wait = 3; step = 10
+			m._end_game(); wait = 3; step = 10
 		10:
 			shot("touch_04_gameover")
 			ok("game over shows restart", m.hud.overlay.visible and m.hud.overlay.restart_btn.visible)

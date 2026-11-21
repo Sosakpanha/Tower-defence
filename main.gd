@@ -6,7 +6,6 @@ var gold := Config.START_GOLD
 var selected := "gunner"      # tower type to build
 var speed_idx := 0
 var game_over := false
-var won := false
 
 var map := GameMap.new()
 var castle := Castle.new()
@@ -53,12 +52,13 @@ func _ready() -> void:
 	buildings.income.connect(func(n: int) -> void: gold += n; _update_hud())
 	buildings.changed.connect(_update_hud)
 	build_menu.building_chosen.connect(_select_building)
-	castle.destroyed.connect(func() -> void: _end_game(false))
+	castle.destroyed.connect(_end_game)
 	castle.damaged.connect(func(_hp: int) -> void: _update_hud())
 	waves.wave_started.connect(_on_wave_started)
 	waves.wave_cleared.connect(_on_wave_cleared)
 	waves.enemy_killed.connect(_on_enemy_killed)
-	waves.enemy_leaked.connect(_on_enemy_leaked)
+	waves.castle_hit.connect(_on_castle_hit)
+	tower_mgr.lost.connect(func(_c: Vector2i) -> void: _update_hud())
 	router.map = map
 	router.has_tower = func(c: Vector2i) -> bool: return towers.has(c)
 	router.preview_cell.connect(func(c: Vector2i) -> void: preview.pending = c)
@@ -105,8 +105,6 @@ func _update_hud() -> void:
 	hud.set_speed(Config.SPEEDS[speed_idx])
 	if wave_active:
 		hud.set_preview("Wave %d: %s" % [wave, WaveManager.describe(wave)])
-	elif wave >= Config.MAX_WAVE:
-		hud.set_preview("")
 	else:
 		hud.set_preview("Next: %s" % WaveManager.describe(wave + 1))
 	_refresh_tower_panel()
@@ -226,8 +224,7 @@ func _on_wave_started(_w: int) -> void:
 
 func _on_wave_cleared(w: int) -> void:
 	gold += 20 + w * 5
-	if w >= Config.MAX_WAVE:
-		_end_game(true)
+	tower_mgr.heal_all()
 	_update_hud()
 	autosave()
 
@@ -237,9 +234,9 @@ func _on_enemy_killed(e: Enemy) -> void:
 	_update_hud()
 
 
-func _on_enemy_leaked(_e: Enemy) -> void:
+func _on_castle_hit(damage: int) -> void:
 	sfx.play_sfx("leak", -3.0)
-	castle.take_damage(1)
+	castle.take_damage(damage)
 
 
 func set_paused(on: bool) -> void:
@@ -267,12 +264,11 @@ func restart() -> void:
 	get_tree().reload_current_scene()
 
 
-func _end_game(victory: bool) -> void:
+func _end_game() -> void:
 	game_over = true
 	SaveGame.clear()
 	router.clear_pending()
 	router.enabled = false
-	won = victory
-	hud.show_message(("YOU WIN!" if victory else "GAME OVER") + "", victory)
-	sfx.play_sfx("win" if victory else "lose")
+	hud.show_message("GAME OVER\nYou survived %d waves" % wave, false)
+	sfx.play_sfx("lose")
 	_update_hud()

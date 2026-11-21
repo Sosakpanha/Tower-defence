@@ -12,7 +12,7 @@ const KINDS := {
 }
 
 signal died(enemy: Enemy)
-signal reached_end(enemy: Enemy)  # reached the castle
+signal hit_castle(damage: int)   # standing at the castle and hitting it
 
 var pathing: Pathing
 var points: Array[Vector2] = []
@@ -30,7 +30,8 @@ var sprite := AnimatedSprite2D.new()
 var base_tint := Color.WHITE
 var atk_damage := 8.0     # damage to buildings per hit
 var atk_cooldown := 0.0
-var atk_range := 0.0      # >0: ranged, shoots buildings in range while walking on
+var atk_range := 0.0      # >0: ranged, shoots towers/buildings in range while walking on
+var at_castle := false    # reached the castle: stays and attacks until killed
 
 
 func setup(path: Pathing, spawn: Vector2i, kind_name: String, wave: int) -> void:
@@ -41,11 +42,11 @@ func setup(path: Pathing, spawn: Vector2i, kind_name: String, wave: int) -> void
 	pathing.changed.connect(_repath)
 	var st: Dictionary = KINDS.get(kind_name, KINDS.normal)
 	var scale_hp := 1.0 + wave * 0.25 + wave * wave * 0.016
-	speed = st.speed
+	speed = st.speed * minf(1.6, 1.0 + wave * 0.01)
 	max_hp = st.hp * scale_hp
-	reward = st.reward
+	reward = int(st.reward * (1.0 + wave * 0.04))
 	radius = st.radius
-	atk_damage = st.atk
+	atk_damage = st.atk * (1.0 + wave * 0.08)
 	atk_range = st.get("range", 0.0)
 	hp = max_hp
 	_build_sprite(kind)
@@ -119,9 +120,12 @@ func _process(delta: float) -> void:
 	sprite.speed_scale = mult
 	sprite.modulate = base_tint * Color(0.6, 0.9, 1.0) if slow_timer > 0.0 else base_tint
 	atk_cooldown -= delta
+	if at_castle:
+		_attack_castle()
+		return
 	if atk_range > 0.0:
 		_shoot_nearby()
-	if _attack_blocker():
+	if _attack_tower() or _attack_blocker():
 		queue_redraw()
 		return
 	var move := speed * mult * delta
@@ -139,9 +143,8 @@ func _process(delta: float) -> void:
 			move = 0.0
 	_progress = -_remaining()
 	if target_idx >= points.size() or Config.is_castle(Config.world_to_cell(position)):
-		dead = true
-		reached_end.emit(self)
-		queue_free()
+		at_castle = true
+		_progress = 0.0
 	queue_redraw()
 
 
@@ -158,19 +161,47 @@ func _attack_blocker() -> bool:
 	return true
 
 
-## Ranged raiders shoot the nearest building within `atk_range` while still walking.
+## Standing at the castle: hit it once a second until a tower kills this enemy.
+func _attack_castle() -> void:
+	if atk_cooldown <= 0.0:
+		atk_cooldown = 1.0
+		hit_castle.emit(maxi(1, roundi(atk_damage * Config.CASTLE_DMG_FACTOR)))
+
+
+## Melee raiders stop and hit any tower within reach until it falls. True = busy attacking.
+func _attack_tower() -> bool:
+	var t := _nearest_target(radius + 44.0, ["towers"])
+	if t == null:
+		return false
+	if atk_cooldown <= 0.0:
+		atk_cooldown = 1.0
+		t.take_damage(atk_damage)
+	return true
+
+
+## Nearest tower/building within `reach`. `groups` = node groups to search; buildings are
+## included when "buildings" is listed.
+func _nearest_target(reach: float, groups: Array) -> Node2D:
+	var best: Node2D = null
+	var best_d := reach
+	var pool: Array = []
+	for g in groups:
+		pool.append_array(pathing.occupants.values() if g == "buildings" else get_tree().get_nodes_in_group(g))
+	for n in pool:
+		if not is_instance_valid(n):
+			continue
+		var d := position.distance_to((n as Node2D).position)
+		if d <= best_d:
+			best_d = d
+			best = n as Node2D
+	return best
+
+
+## Ranged raiders shoot the nearest tower or building within `atk_range` while still walking.
 func _shoot_nearby() -> void:
 	if atk_cooldown > 0.0:
 		return
-	var best: Building = null
-	var best_d := atk_range
-	for b in pathing.occupants.values():
-		if not is_instance_valid(b):
-			continue
-		var d := position.distance_to((b as Node2D).position)
-		if d <= best_d:
-			best_d = d
-			best = b as Building
+	var best := _nearest_target(atk_range, ["towers", "buildings"])
 	if best:
 		atk_cooldown = 1.5
 		best.take_damage(atk_damage)

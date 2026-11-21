@@ -5,7 +5,7 @@ extends Node
 signal wave_started(wave: int)
 signal wave_cleared(wave: int)
 signal enemy_killed(enemy: Enemy)
-signal enemy_leaked(enemy: Enemy)
+signal castle_hit(damage: int)   # an enemy at the castle landed a hit
 
 var wave := 0
 var active := false
@@ -69,7 +69,7 @@ func _process(delta: float) -> void:
 	if not queue.is_empty():
 		timer -= delta
 		if timer <= 0.0:
-			timer = maxf(0.4, 1.0 - wave * 0.05)
+			timer = maxf(0.25, 1.0 - wave * 0.04)
 			_spawn(queue.pop_front())
 	elif enemies_node.get_child_count() == 0:
 		active = false
@@ -80,5 +80,5 @@ func _spawn(kind: String) -> void:
 	var e := Enemy.new()
 	e.setup(pathing, Config.SPAWN_CELLS.pick_random(), kind, wave)
 	e.died.connect(func(en: Enemy) -> void: enemy_killed.emit(en))
-	e.reached_end.connect(func(en: Enemy) -> void: enemy_leaked.emit(en))
+	e.hit_castle.connect(func(d: int) -> void: castle_hit.emit(d))
 	enemies_node.add_child(e)

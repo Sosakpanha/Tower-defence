@@ -17,9 +17,8 @@ func setup(waves: WaveManager) -> void:
 	waves.wave_started.connect(func(w: int) -> void: _set_phase(true, w))
 	waves.wave_cleared.connect(func(w: int) -> void:
 		time_left = Config.DAY_SECONDS
-		enabled = w < Config.MAX_WAVE
-		if w < Config.MAX_WAVE:
-			_set_phase(false, w + 1))
+		enabled = true
+		_set_phase(false, w + 1))
 	phase_changed.emit(false, 1)
 
 

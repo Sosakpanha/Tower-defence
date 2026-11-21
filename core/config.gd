@@ -9,8 +9,9 @@ const ORIGIN := Vector2(0, 80)  # leave room for the HUD bar on top
 const SCREEN := Vector2(1280, 720)
 
 const START_GOLD := 250
-const CASTLE_HP := 20
-const MAX_WAVE := 20
+const CASTLE_HP := 200
+const TOWER_HP := 150.0           # level 1; x1.5 / x2 on upgrade
+const CASTLE_DMG_FACTOR := 0.5    # castle damage per second = enemy attack x this
 const SELL_REFUND := 0.7
 const FIRST_DAY_SECONDS := 45.0  # build time before wave 1
 const DAY_SECONDS := 30.0        # build time between later waves

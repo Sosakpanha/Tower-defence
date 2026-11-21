@@ -62,4 +62,4 @@ static func restore(m: Node, d: Dictionary) -> void:
 ## One-line description for the Continue button.
 static func summary() -> String:
 	var d := read()
-	return "Wave %d/%d  -  %d gold" % [d.get("wave", 0), Config.MAX_WAVE, d.get("gold", 0)] if not d.is_empty() else ""
+	return "Wave %d  -  %d gold" % [d.get("wave", 0), d.get("gold", 0)] if not d.is_empty() else ""

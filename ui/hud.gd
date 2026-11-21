@@ -38,7 +38,7 @@ func _ready() -> void:
 func set_stats(gold: int, lives: int, wave: int) -> void:
 	gold_label.text = str(gold)
 	lives_label.text = str(lives)
-	wave_label.text = "%d/%d" % [wave, Config.MAX_WAVE]
+	wave_label.text = "Wave %d" % wave
 
 
 func set_wave_button_disabled(disabled: bool) -> void:
@@ -129,7 +129,7 @@ func _build_stats() -> void:
 		info.add_child(icon)
 		var lbl: Label = pair[1]
 		lbl.add_theme_font_size_override("font_size", 22)
-		lbl.custom_minimum_size = Vector2(54, 0)
+		lbl.custom_minimum_size = Vector2(54 if lbl != wave_label else 100, 0)
 		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		info.add_child(lbl)
 	preview_label.position = Vector2(940, 54)

@@ -28,7 +28,7 @@ func _process(_d: float) -> bool:
 		m.waves.wave = 4; m.castle.hp = 11; m.gold = 777
 		m.autosave()
 		ok("save file written", SaveGame.has_save())
-		ok("summary", SaveGame.summary() == "Wave 4/%d  -  777 gold" % Config.MAX_WAVE)
+		ok("summary", SaveGame.summary() == "Wave 4  -  777 gold")
 		m.queue_free()
 	if frame == 4:
 		SaveGame.pending = SaveGame.read()

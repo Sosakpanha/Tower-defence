@@ -66,7 +66,7 @@ func _process(delta: float) -> bool:
 	if frame < 3 or m.game_over:
 		if m.game_over and not done:
 			done = true
-			print("RESULT ", "WIN" if m.won else "LOSE at wave %d" % m.wave, " castle_hp=", m.lives, " gold=", m.gold)
+			print("RESULT ", "LOSE at wave %d" % m.wave, " castle_hp=", m.lives, " gold=", m.gold)
 		return m.game_over
 	while step < ORDER.size() and _try_step():
 		step += 1
@@ -80,4 +80,4 @@ func _process(delta: float) -> bool:
 		if idle >= IDLE_BEFORE_WAVE:
 			idle = 0.0
 			m.start_wave()
-	return frame > 200000
+	return frame > 200000 or m.wave > 30   # endless mode: stop the bot at wave 30

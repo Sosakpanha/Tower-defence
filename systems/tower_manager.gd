@@ -5,6 +5,8 @@ extends Node2D
 
 var towers := {}                  # Vector2i -> Tower
 var sel_cell := Vector2i(-1, -1)  # selected tower's cell, (-1,-1) = none
+signal lost(cell: Vector2i)   # a tower was destroyed by enemies
+
 var pathing: Pathing
 var projectiles: Node
 
@@ -20,6 +22,7 @@ func add(kind: String, c: Vector2i) -> void:
 	t.position = Config.cell_center(c)
 	add_child(t)
 	towers[c] = t
+	t.destroyed.connect(func(_t: Tower) -> void: remove(c); lost.emit(c))
 	pathing.set_blocked(c, true)
 
 
@@ -33,6 +36,11 @@ func remove(c: Vector2i) -> int:
 	towers.erase(c)
 	pathing.set_blocked(c, false)
 	return value
+
+
+func heal_all() -> void:
+	for t: Tower in towers.values():
+		t.heal_full()
 
 
 func select(c: Vector2i) -> void:
