@@ -100,7 +100,7 @@ func _build_toolbar() -> void:
 	var keys := Tower.TYPES.keys()
 	for k in keys:
 		var t: Dictionary = Tower.TYPES[k]
-		var b := IconButton.new().setup(t.get("art", k) if k != "cannon" else k, "%s  $%d\n[%d] key" % [t.name, t.cost, keys.find(k) + 1], "$%d" % t.cost)
+		var b := IconButton.new().setup(k, "%s  $%d\n[%d] key" % [t.name, t.cost, keys.find(k) + 1], "$%d" % t.cost)
 		b.pressed.connect(tower_chosen.emit.bind(k))
 		bar.add_child(b)
 		tower_buttons[k] = b

@@ -1,14 +1,14 @@
 class_name Enemy
 extends Node2D
 
-## Stats per kind. art/tint/scale are PNG sets (goblin/wolf/ogre) or SVG sets (all kinds now; see tools/gen_art.py).
+## Stats per kind. Art: assets/art/gen/enemy_<kind>.png, drawn `px` pixels on its longest side.
 const KINDS := {
-	"normal": {"speed": 65.0, "hp": 40.0, "reward": 5, "radius": 16.0, "atk": 8.0, "art": "goblin", "tint": Color.WHITE, "scale": 1.0},
-	"fast": {"speed": 110.0, "hp": 20.0, "reward": 4, "radius": 14.0, "atk": 6.0, "art": "wolf", "tint": Color.WHITE, "scale": 1.0},
-	"tank": {"speed": 40.0, "hp": 120.0, "reward": 12, "radius": 22.0, "atk": 20.0, "art": "ogre", "tint": Color.WHITE, "scale": 1.0},
-	"archer": {"speed": 55.0, "hp": 35.0, "reward": 7, "radius": 14.0, "atk": 6.0, "range": 170.0, "art": "archer", "tint": Color.WHITE, "scale": 1.0},
-	"swarm": {"speed": 100.0, "hp": 10.0, "reward": 2, "radius": 10.0, "atk": 3.0, "art": "swarm", "tint": Color.WHITE, "scale": 1.0},
-	"boss": {"speed": 32.0, "hp": 500.0, "reward": 120, "radius": 32.0, "atk": 60.0, "art": "boss", "tint": Color.WHITE, "scale": 1.0},
+	"normal": {"speed": 65.0, "hp": 40.0, "reward": 5, "radius": 16.0, "atk": 8.0, "px": 46.0},
+	"fast": {"speed": 110.0, "hp": 20.0, "reward": 4, "radius": 14.0, "atk": 6.0, "px": 54.0},
+	"tank": {"speed": 40.0, "hp": 120.0, "reward": 12, "radius": 22.0, "atk": 20.0, "px": 66.0},
+	"archer": {"speed": 55.0, "hp": 35.0, "reward": 7, "radius": 14.0, "atk": 6.0, "range": 170.0, "px": 48.0},
+	"swarm": {"speed": 100.0, "hp": 10.0, "reward": 2, "radius": 10.0, "atk": 3.0, "px": 36.0},
+	"boss": {"speed": 32.0, "hp": 500.0, "reward": 120, "radius": 32.0, "atk": 60.0, "px": 110.0},
 }
 
 signal died(enemy: Enemy)
@@ -26,8 +26,8 @@ var radius := 12.0
 var slow_timer := 0.0
 var dead := false
 var kind := "normal"
-var sprite := AnimatedSprite2D.new()
-var base_tint := Color.WHITE
+var sprite := Sprite2D.new()
+var _t := 0.0             # walk-wobble phase
 var atk_damage := 8.0     # damage to buildings per hit
 var atk_cooldown := 0.0
 var atk_range := 0.0      # >0: ranged, shoots towers/buildings in range while walking on
@@ -54,21 +54,11 @@ func setup(path: Pathing, spawn: Vector2i, kind_name: String, wave: int) -> void
 
 
 func _build_sprite(kind: String) -> void:
-	var st: Dictionary = KINDS.get(kind, KINDS.normal)
-	var art: String = st.art
-	var tint: Color = st.tint
-	var sc: float = st.scale
-	var fps := {"goblin": 8.0, "wolf": 12.0, "ogre": 6.0, "archer": 8.0, "swarm": 12.0, "boss": 5.0}
-	var frames := SpriteFrames.new()
-	frames.set_animation_speed("default", fps[art])
-	for i in 4:
-		var svg := "res://assets/art/%s_%02d.svg" % [art, i]
-		frames.add_frame("default", load(svg if ResourceLoader.exists(svg) else "res://assets/enemies/%s/%s_%02d.png" % [art, art, i]))
-	sprite.sprite_frames = frames
-	base_tint = tint
-	sprite.scale = Vector2(sc, sc)
-	sprite.play("default")
-	sprite.frame = randi() % 4
+	var tex: Texture2D = load("res://assets/art/gen/enemy_%s.png" % kind)
+	sprite.texture = tex
+	var px: float = KINDS[kind].get("px", 48.0)   # on-screen size of the longest side
+	sprite.scale = Vector2.ONE * px / maxf(tex.get_width(), tex.get_height())
+	_t = randf() * TAU
 	add_child(sprite)
 
 
@@ -117,8 +107,10 @@ func _process(delta: float) -> void:
 	if slow_timer > 0.0:
 		slow_timer -= delta
 		mult = 0.5
-	sprite.speed_scale = mult
-	sprite.modulate = base_tint * Color(0.6, 0.9, 1.0) if slow_timer > 0.0 else base_tint
+	_t += delta * 9.0 * mult
+	sprite.position.y = -absf(sin(_t)) * 3.0
+	sprite.rotation = sin(_t) * 0.06
+	sprite.modulate = Color(0.6, 0.9, 1.0) if slow_timer > 0.0 else Color.WHITE
 	atk_cooldown -= delta
 	if at_castle:
 		_attack_castle()

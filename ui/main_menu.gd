@@ -14,7 +14,7 @@ func _ready() -> void:
 	bg.modulate = Color(0.55, 0.75, 0.55)
 	add_child(bg)
 	var castle := TextureRect.new()
-	castle.texture = load("res://assets/art/castle.svg")
+	castle.texture = load("res://assets/art/gen/castle.png")
 	castle.position = Vector2(Config.SCREEN.x / 2 - 110, 40)
 	castle.size = Vector2(220, 220)
 	castle.expand_mode = TextureRect.EXPAND_IGNORE_SIZE

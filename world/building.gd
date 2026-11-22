@@ -6,8 +6,8 @@ signal produced(amount: int, building: Building)
 signal destroyed(building: Building)
 
 const TEXTURES := {
-	"farm": preload("res://assets/art/farm.svg"), "lumber": preload("res://assets/art/lumber.svg"),
-	"house": preload("res://assets/art/house.svg"), "wall": preload("res://assets/art/wall.svg"),
+	"farm": preload("res://assets/art/gen/farm.png"), "lumber": preload("res://assets/art/gen/lumber.png"),
+	"house": preload("res://assets/art/gen/house.png"), "wall": preload("res://assets/art/gen/wall.png"),
 }
 
 var kind := "farm"
@@ -49,7 +49,7 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	draw_texture_rect(TEXTURES[kind], Rect2(-32, -32, 64, 64), false)
+	draw_texture_rect(TEXTURES[kind], Sprite.fit(TEXTURES[kind], 60.0, Vector2(0, 28)), false)
 	if hp < max_hp:
 		draw_rect(Rect2(-24, 28, 48, 5), Color(0, 0, 0, 0.6))
 		draw_rect(Rect2(-24, 28, 48 * clampf(hp / max_hp, 0, 1), 5), Color.LIME_GREEN)

@@ -27,7 +27,8 @@ const HP_MULT := [1.0, 1.5, 2.0]
 var max_hp := Config.TOWER_HP
 var hp := Config.TOWER_HP
 var projectile_parent: Node
-var turret: Sprite2D
+var body: Sprite2D
+var _base_scale := 1.0
 
 
 func setup(k: String, proj_parent: Node) -> void:
@@ -36,20 +37,12 @@ func setup(k: String, proj_parent: Node) -> void:
 	spent = stats.cost
 	projectile_parent = proj_parent
 	add_to_group("towers")
-	var base := Sprite2D.new()
-	var art: String = stats.get("art", k)
-	base.texture = _tex("%s_base" % art)
-	add_child(base)
-	turret = Sprite2D.new()
-	turret.texture = _tex("%s_turret" % art)
-	turret.modulate = stats.get("tint", Color.WHITE)
-	add_child(turret)
-
-
-## Prefers hand-made SVG art (assets/art), falls back to the PNG tower set.
-func _tex(n: String) -> Texture2D:
-	var svg := "res://assets/art/%s.svg" % n
-	return load(svg if ResourceLoader.exists(svg) else "res://assets/towers/%s.png" % n)
+	body = Sprite2D.new()   # the finished tower picture; it kicks back a little when firing
+	body.texture = load("res://assets/art/gen/tower_%s.png" % k)
+	_base_scale = 62.0 / maxf(body.texture.get_width(), body.texture.get_height())
+	body.scale = Vector2.ONE * _base_scale
+	body.position = Vector2(0, 2)
+	add_child(body)
 
 
 func get_damage() -> float:
@@ -78,7 +71,7 @@ func upgrade() -> void:
 	var new_max: float = Config.TOWER_HP * HP_MULT[level - 1]
 	hp += new_max - max_hp
 	max_hp = new_max
-	turret.scale = Vector2.ONE * (1.0 + 0.1 * (level - 1))
+	body.scale = Vector2.ONE * _base_scale * (1.0 + 0.06 * (level - 1))
 	queue_redraw()
 
 
@@ -100,7 +93,7 @@ func _process(delta: float) -> void:
 	cooldown -= delta
 	if recoil > 0.0:
 		recoil = maxf(0.0, recoil - delta * 40.0)
-		turret.position = -Vector2.from_angle(angle) * recoil
+		body.position = Vector2(0, 2) - Vector2.from_angle(angle) * recoil
 	var best: Enemy = null
 	var best_p := -INF
 	for e in get_tree().get_nodes_in_group("enemies"):
@@ -112,7 +105,6 @@ func _process(delta: float) -> void:
 			best = en
 	if best:
 		angle = (best.position - position).angle()
-		turret.rotation = angle
 		if cooldown <= 0.0:
 			cooldown = get_rate()
 			var p := Projectile.new()

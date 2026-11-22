@@ -4,7 +4,8 @@ extends Node2D
 
 const TEX_GRASS := preload("res://assets/art/grass_a.svg")
 const TEX_GRASS_B := preload("res://assets/art/grass_b.svg")
-const TEX_TREE := preload("res://assets/art/tree.svg")
+const TEX_PORTAL := preload("res://assets/art/gen/portal.png")
+const TEX_TREE := preload("res://assets/art/gen/tree.png")
 
 
 func mouse_cell() -> Vector2i:
@@ -29,7 +30,8 @@ func _draw() -> void:
 			else:
 				draw_texture_rect(TEX_GRASS if (x + y) % 3 != 0 else TEX_GRASS_B, r, false)
 	for s in Config.SPAWN_CELLS:  # dark openings where enemies come out of the jungle
-		draw_rect(cell_rect(s).grow(-14), Color(0.05, 0.12, 0.05, 0.8))
+		var r := cell_rect(s)
+		draw_texture_rect(TEX_PORTAL, Sprite.fit(TEX_PORTAL, 60.0, r.position + Vector2(32, 62)), false)
 
 
 func _draw_trees(c: Vector2i, r: Rect2) -> void:

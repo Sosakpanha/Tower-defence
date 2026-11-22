@@ -27,7 +27,8 @@ together. Each concern lives in its own file with a `class_name`, and modules ta
 | `world/castle.gd` | The castle: HP, `damaged`/`destroyed` signals, drawing. |
 | `world/placement_preview.gd` | Hover highlight and range ring. |
 | `ui/icon_button.gd` | `IconButton`: icon-only button, cost caption, name as hover tooltip. Icons: `assets/art/icon_<name>.svg`. |
-| `assets/art/*.svg`, `tools/gen_art.py` | Castle, buildings, tree, icons are SVG made by the script: edit it, run `python3 tools/gen_art.py` then `Godot --headless --path . --import`. Preload SVGs (`load()` inside `_draw` rendered gray). |
+| `assets/art/gen/*.png`, `assets/source/`, `tools/slice_sheet.gd` | Main art is AI-generated (ChatGPT image sheets, flat grey bg) saved in `assets/source/`, cut into transparent sprites by `Godot --headless --path . --script tools/slice_sheet.gd -- <sheet> <out_dir> <cols> <max_px> names...`. Enemies `enemy_<kind>.png`, towers `tower_<kind>.png` (static; body kicks back when firing). |
+| `assets/art/*.svg`, `tools/gen_art.py` | Small code-drawn leftovers: play/pause/speed icons, projectiles, grass tiles. Preload SVGs (`load()` inside `_draw` rendered gray). |
 | `ui/hud.gd` | ALL UI. Holds no game rules; shows what Main says, emits signals (`tower_chosen`, `upgrade_pressed`, ...). |
 | `systems/tower_manager.gd` | Placed towers, selling, selection/range ring. Main handles gold. |
 | `systems/save_game.gd` | `user://save.json`: autosave at dawn/pause/menu, `restore()` on Continue via `SaveGame.pending`. Test: `tools/save_test.gd`. |
