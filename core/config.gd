@@ -83,3 +83,6 @@ const ENEMY_STRIDE := 15.0          # pixels walked per animation step (walk fra
 const ENEMY_STRIDE_MULT := {"normal": 1.0, "archer": 1.0, "fast": 1.5, "swarm": 1.8, "tank": 0.85, "boss": 0.55}
 const FX_HIT_INTERVAL := 0.12       # min seconds between hit sparks on one enemy
 const ENEMY_DEATH_TIME := 0.4
+const HERO_PX := 62.0               # drawn height of a hero sprite (px)
+const HERO_STRIDE := 26.0           # pixels walked per hero animation step (4 frames = 2 steps)
+const HERO_ATTACK_POSE := 0.28      # seconds the attack frame is shown per hit
