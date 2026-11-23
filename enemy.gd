@@ -41,12 +41,12 @@ func setup(path: Pathing, spawn: Vector2i, kind_name: String, wave: int) -> void
 	_repath()
 	pathing.changed.connect(_repath)
 	var st: Dictionary = KINDS.get(kind_name, KINDS.normal)
-	var scale_hp := 1.0 + wave * 0.25 + wave * wave * 0.016
+	var scale_hp := 1.0 + wave * Config.ENEMY_HP_LIN + wave * wave * Config.ENEMY_HP_QUAD
 	speed = st.speed * minf(1.6, 1.0 + wave * 0.01)
 	max_hp = st.hp * scale_hp
-	reward = int(st.reward * (1.0 + wave * 0.04))
+	reward = int(st.reward * (1.0 + wave * Config.ENEMY_REWARD_PER_WAVE))
 	radius = st.radius
-	atk_damage = st.atk * (1.0 + wave * 0.08)
+	atk_damage = st.atk * (1.0 + wave * Config.ENEMY_ATK_PER_WAVE)
 	atk_range = st.get("range", 0.0)
 	hp = max_hp
 	_build_sprite(kind)

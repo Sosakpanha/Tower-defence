@@ -23,7 +23,7 @@ func setup(path: Pathing, enemies_parent: Node2D) -> void:
 ## Enemy kinds for wave `w`, in spawn order. Edit this to change the difficulty curve.
 static func wave_list(w: int) -> Array[String]:
 	var list: Array[String] = []
-	for i in 3 + int(w * 1.5 + w * w * 0.08):
+	for i in Config.WAVE_COUNT_BASE + int(w * Config.WAVE_COUNT_LIN + w * w * Config.WAVE_COUNT_QUAD):
 		var kind := "normal"
 		if w >= 3 and i % 4 == 3:
 			kind = "fast"
@@ -35,7 +35,9 @@ static func wave_list(w: int) -> Array[String]:
 	if w >= 2 and w % 3 == 2:  # rat swarm
 		for i in 4 + w:
 			list.append("swarm")
-	if w % 5 == 0:  # boss every 5th wave
+	if w == 5:  # first milestone: a pair of ogres
+		list.append_array(["tank", "tank"])
+	elif w % 5 == 0:  # boss every 5th wave from wave 10
 		for i in 1 + w / 20:
 			list.append("boss")
 	return list
