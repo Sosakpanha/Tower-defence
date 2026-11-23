@@ -6,13 +6,13 @@ extends RefCounted
 const MAX_LEVEL := 5
 const KILLS_FOR_LEVEL := [0, 6, 16, 32, 55]   # total kills needed to reach level 1..5
 const EVOLVE_LEVEL := 3        # evolution unlocks at this level
-const EVOLVE_COST := 250
-const LEVEL_BONUS := 0.18      # +18% hp/damage per level above 1
+const EVOLVE_COST := 200
+const LEVEL_BONUS := 0.3      # +18% hp/damage per level above 1
 
 # melee heroes hit in `range`, ranged ones shoot a projectile.
 const KINDS := {
-	"knight": {"name": "Knight", "cost": 200, "hp": 260.0, "dmg": 16.0, "rate": 0.9, "range": 58.0, "speed": 150.0, "melee": true, "color": Color(0.55, 0.65, 0.85)},
-	"archer": {"name": "Archer", "cost": 200, "hp": 130.0, "dmg": 13.0, "rate": 0.65, "range": 210.0, "speed": 160.0, "melee": false, "color": Color(0.45, 0.8, 0.45)},
+	"knight": {"name": "Knight", "cost": 150, "hp": 700.0, "dmg": 60.0, "rate": 0.8, "range": 58.0, "speed": 150.0, "melee": true, "color": Color(0.55, 0.65, 0.85)},
+	"archer": {"name": "Archer", "cost": 150, "hp": 320.0, "dmg": 45.0, "rate": 0.65, "range": 210.0, "speed": 160.0, "melee": false, "color": Color(0.45, 0.8, 0.45)},
 }
 
 # Multipliers on the base kind (hp/dmg/rate/range/speed); extras: regen (hp/s), heal (tower hp/s

@@ -37,7 +37,7 @@ func _process(_d: float) -> bool:
 			ok("cannot afford hero", not h.alive() and m.gold == 100)
 			m.gold = 1000
 			m.gold -= h.try_buy("knight", m.gold)
-			ok("hero bought for 200", h.alive() and m.gold == 800)
+			ok("hero bought at its listed cost", h.alive() and m.gold == 1000 - Heroes.KINDS.knight.cost)
 			ok("second hero refused", h.try_buy("archer", m.gold) == 0)
 			var hp: Vector2 = h.hero.position
 			ok("tap hero selects it", h.intercept(hp, MOUSE_BUTTON_LEFT) and h.hero.selected)
@@ -70,7 +70,7 @@ func _process(_d: float) -> bool:
 			ok("evolve refused when poor", h.try_evolve("paladin", m.gold) == 0)
 			m.gold = 500
 			m.gold -= h.try_evolve("paladin", m.gold)
-			ok("evolved to paladin for 250", h.evo == "paladin" and m.gold == 250 and h.hero.stats.heal > 0.0)
+			ok("evolved to paladin at the evolve cost", h.evo == "paladin" and m.gold == 500 - Heroes.EVOLVE_COST and h.hero.stats.heal > 0.0)
 			ok("panel shows name", h.info().name == "Paladin")
 			ok("evolve twice refused", not h.can_evolve())
 		160:

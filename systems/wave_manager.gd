@@ -34,7 +34,7 @@ static func wave_list(w: int) -> Array[String]:
 		if w >= 5 and i % 5 == 4:
 			kind = "tank"
 		list.append(kind)
-	if w >= 2 and w % 3 == 2:  # rat swarm
+	if w >= 5 and w % 3 == 2:  # rat swarm (waves 1-4 stay gentle)
 		for i in 4 + w:
 			list.append("swarm")
 	if w == 5:  # first milestone: a pair of ogres

@@ -9,8 +9,8 @@ signal cooldown(kind: String, fraction: float, seconds_left: float)  # fraction 
 signal aim_changed(kind: String)                                       # "" = not aiming
 
 const TYPES := {
-	"volley": {"name": "Arrow Volley", "cooldown": 30.0, "radius": 150.0, "damage": 60.0, "targeted": true},
-	"freeze": {"name": "Freeze", "cooldown": 45.0, "slow": 6.0, "targeted": false},
+	"volley": {"name": "Arrow Volley", "cooldown": 20.0, "radius": 160.0, "damage": 100.0, "targeted": true},
+	"freeze": {"name": "Freeze", "cooldown": 35.0, "slow": 6.0, "targeted": false},
 }
 
 var cd := {}        # kind -> seconds left
@@ -72,7 +72,7 @@ func _apply(kind: String, pos: Vector2, enemies: Array) -> float:
 	var w := maxi(1, waves.wave if waves else 1)
 	match kind:
 		"volley":
-			var dmg: float = st.damage * (1.0 + w * 0.25 + w * w * 0.016)  # keeps pace with enemy HP
+			var dmg: float = st.damage * (1.0 + w * Config.ENEMY_HP_LIN + w * w * Config.ENEMY_HP_QUAD)  # keeps pace with enemy HP
 			for e: Enemy in enemies:
 				if e.position.distance_to(pos) <= st.radius + e.radius:
 					e.take_damage(dmg)

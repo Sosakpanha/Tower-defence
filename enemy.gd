@@ -8,7 +8,7 @@ const KINDS := {
 	"tank": {"speed": 40.0, "hp": 120.0, "reward": 12, "radius": 22.0, "atk": 20.0, "px": 66.0},
 	"archer": {"speed": 55.0, "hp": 35.0, "reward": 7, "radius": 14.0, "atk": 6.0, "range": 170.0, "px": 48.0},
 	"swarm": {"speed": 100.0, "hp": 10.0, "reward": 2, "radius": 10.0, "atk": 3.0, "px": 36.0},
-	"boss": {"speed": 32.0, "hp": 500.0, "reward": 120, "radius": 32.0, "atk": 60.0, "px": 110.0},
+	"boss": {"speed": 32.0, "hp": 360.0, "reward": 120, "radius": 32.0, "atk": 35.0, "px": 110.0},
 }
 
 signal died(enemy: Enemy)
