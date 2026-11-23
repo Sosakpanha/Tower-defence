@@ -34,6 +34,8 @@ together. Each concern lives in its own file with a `class_name`, and modules ta
 | `systems/save_game.gd` | `user://save.json`: autosave at dawn/pause/menu, `restore()` on Continue via `SaveGame.pending`. Test: `tools/save_test.gd`. |
 | `ui/main_menu.gd` + `menu.tscn` | Title screen (main scene): New Game / Continue. Game is `main.tscn`. |
 | `tower.gd`, `enemy.gd`, `projectile.gd` | Game objects. Tower types live in `Tower.TYPES` (optional `splash`, `art`, `tint`); enemy kinds in `Enemy.KINDS`. |
+| `core/evolutions.gd` (`Evolutions`), `ui/evolve_box.gd` | Tower evolution table: at level 3 each tower picks 1 of 2 branches (stat mods, tint, badge). Add a branch = one entry. EvolveBox is the choice UI inside the tower panel. `tools/evolution_test.gd`. |
+| `core/heroes.gd`, `world/hero.gd`, `systems/hero_manager.gd`, `ui/hero_panel.gd` | One buyable hero (Knight/Archer, 2 evolutions each), levels by kills, respawns at dawn/after cooldown, tap hero then map to move (via `InputRouter.intercept`). Enemies target it via group `heroes`. `tools/hero_test.gd`. |
 | `main.gd` | Rules + input + connecting signals. Target: stay under ~250 lines. |
 
 Rules of thumb:

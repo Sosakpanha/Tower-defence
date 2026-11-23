@@ -17,6 +17,7 @@ var show_range := false
 var recoil := 0.0
 var level := 1
 var spent := 0
+var evo := ""   # evolution branch id ("" = not evolved), see core/evolutions.gd
 const MAX_LEVEL := 3
 const DMG_MULT := [1.0, 1.6, 2.4]
 const RANGE_MULT := [1.0, 1.1, 1.2]
@@ -46,15 +47,15 @@ func setup(k: String, proj_parent: Node) -> void:
 
 
 func get_damage() -> float:
-	return stats.damage * DMG_MULT[level - 1]
+	return stats.damage * DMG_MULT[level - 1] * Evolutions.mod(kind, evo, "dmg", 1.0)
 
 
 func get_range() -> float:
-	return stats.range * RANGE_MULT[level - 1]
+	return stats.range * RANGE_MULT[level - 1] * Evolutions.mod(kind, evo, "range", 1.0)
 
 
 func get_rate() -> float:
-	return stats.rate * RATE_MULT[level - 1]
+	return stats.rate * RATE_MULT[level - 1] * Evolutions.mod(kind, evo, "rate", 1.0)
 
 
 func upgrade_cost() -> int:
@@ -72,6 +73,20 @@ func upgrade() -> void:
 	hp += new_max - max_hp
 	max_hp = new_max
 	body.scale = Vector2.ONE * _base_scale * (1.0 + 0.06 * (level - 1))
+	queue_redraw()
+
+
+## -1 = cannot evolve (not max level, or already evolved).
+func evolve_cost() -> int:
+	return Evolutions.cost(kind) if level >= MAX_LEVEL and evo == "" else -1
+
+
+## Switch to branch `id` (no gold handling here); `paid` adds to the sell value.
+func evolve(id: String, paid: int = 0) -> void:
+	evo = id
+	spent += paid
+	body.modulate = Evolutions.mod(kind, id, "tint", Color.WHITE)
+	body.scale = Vector2.ONE * _base_scale * float(Evolutions.mod(kind, id, "scale", 1.0)) * 1.12
 	queue_redraw()
 
 
@@ -111,8 +126,9 @@ func _process(delta: float) -> void:
 			p.position = position + Vector2.from_angle(angle) * 20.0
 			p.target = best
 			p.damage = get_damage()
-			p.slow = stats.slow
-			p.splash = stats.get("splash", 0.0)
+			p.slow = Evolutions.mod(kind, evo, "slow", stats.slow)
+			p.splash = Evolutions.mod(kind, evo, "splash", stats.get("splash", 0.0))
+			p.chain = Evolutions.mod(kind, evo, "chain", 0)
 			p.color = stats.color
 			recoil = 5.0
 			p.texture = load("res://assets/art/proj_%s.svg" % kind)
@@ -126,6 +142,12 @@ func _draw() -> void:
 		draw_rect(Rect2(-24, -36, 48 * clampf(hp / max_hp, 0, 1), 5), Color.ORANGE_RED)
 	if show_range:
 		draw_arc(Vector2.ZERO, get_range(), 0, TAU, 64, Color(1, 1, 1, 0.5), 2.0)
+	if evo != "":   # evolution badge: star above the tower
+		var pts := PackedVector2Array()
+		for i in 11:
+			pts.append(Vector2(-27, -26) + Vector2.from_angle(-PI / 2 + i * PI / 5) * (9.0 if i % 2 == 0 else 4.0))
+		draw_colored_polygon(pts.slice(0, 10), Evolutions.mod(kind, evo, "badge", Color.WHITE))
+		draw_polyline(pts, Color(0.2, 0.1, 0.03), 1.5)
 	for i in level:
 		var pos := Vector2((i - (level - 1) / 2.0) * 12.0, 27.0)
 		draw_circle(pos, 4.5, Color(0.2, 0.1, 0.03))

@@ -38,6 +38,17 @@ func remove(c: Vector2i) -> int:
 	return value
 
 
+## Gold cost of evolving the tower at `c` into branch `id`; -1 if not allowed.
+func evolve_cost(c: Vector2i, id: String) -> int:
+	var t: Tower = towers.get(c)
+	return t.evolve_cost() if t != null and Evolutions.has(t.kind, id) else -1
+
+
+func evolve(c: Vector2i, id: String) -> void:
+	var t: Tower = towers[c]
+	t.evolve(id, t.evolve_cost())
+
+
 func heal_all() -> void:
 	for t: Tower in towers.values():
 		t.heal_full()

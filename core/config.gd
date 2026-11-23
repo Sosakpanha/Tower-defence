@@ -47,3 +47,8 @@ static func is_jungle(c: Vector2i) -> bool:
 
 static func is_castle(c: Vector2i) -> bool:
 	return CASTLE_RECT.has_point(c)
+
+# Hero (see core/heroes.gd for stats and costs).
+const HERO_SPAWN_CELL := Vector2i(10, 6)   # just below the castle
+const HERO_RESPAWN := 30.0                 # seconds dead (or until dawn)
+const HERO_XP_RADIUS := 260.0              # kills this close to the hero give it XP
