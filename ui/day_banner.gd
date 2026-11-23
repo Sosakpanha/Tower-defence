@@ -13,12 +13,12 @@ func _ready() -> void:
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(overlay)
-	banner.add_theme_font_size_override("font_size", 56)
+	banner.add_theme_font_size_override("font_size", 26)
 	banner.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.0))
-	banner.add_theme_constant_override("outline_size", 10)
+	banner.add_theme_constant_override("outline_size", 6)
 	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	banner.position = Vector2(0, 200)
-	banner.size = Vector2(Config.SCREEN.x, 80)
+	banner.position = Vector2(0, 172)  # top of the field, clear of the middle
+	banner.size = Vector2(Config.SCREEN.x, 36)
 	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	banner.modulate.a = 0.0
 	add_child(banner)
@@ -36,7 +36,7 @@ func show_phase(is_night: bool, number: int) -> void:
 	banner.text = ("Night %d - they come!" if is_night else "Day %d - build!") % number
 	banner.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35) if is_night else Color(1.0, 0.92, 0.5))
 	banner.modulate.a = 1.0
-	tw.tween_property(banner, "modulate:a", 0.0, 1.0).set_delay(1.8)
+	tw.tween_property(banner, "modulate:a", 0.0, 1.0).set_delay(1.2)
 	if is_night:
 		timer_label.text = "Night: defend the castle"
 

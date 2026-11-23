@@ -6,10 +6,12 @@ signal wave_started(wave: int)
 signal wave_cleared(wave: int)
 signal enemy_killed(enemy: Enemy)
 signal castle_hit(damage: int)   # an enemy at the castle landed a hit
+signal boss_spawned
 
 var wave := 0
 var active := false
 var queue: Array[String] = []
+var spawned := 0   # enemies spawned so far this wave (picks the portal via WavePlan)
 var timer := 0.0
 var pathing: Pathing
 var enemies_node: Node2D
@@ -42,9 +44,7 @@ static func wave_list(w: int) -> Array[String]:
 
 
 static func describe(w: int) -> String:
-	var counts := {}
-	for k in wave_list(w):
-		counts[k] = counts.get(k, 0) + 1
+	var counts := WavePlan.counts(w)
 	var parts: Array[String] = []
 	for k in Config.KIND_NAMES:
 		if counts.has(k):
@@ -57,7 +57,8 @@ func start() -> bool:
 		return false
 	wave += 1
 	active = true
-	queue = wave_list(wave)
+	queue = WavePlan.kinds(wave)
+	spawned = 0
 	timer = 0.0
 	wave_started.emit(wave)
 	return true
@@ -78,7 +79,10 @@ func _process(delta: float) -> void:
 
 func _spawn(kind: String) -> void:
 	var e := Enemy.new()
-	e.setup(pathing, Config.SPAWN_CELLS.pick_random(), kind, wave)
+	e.setup(pathing, WavePlan.spawn_cell(wave, spawned), kind, wave)
+	spawned += 1
+	if kind == "boss":
+		boss_spawned.emit()
 	e.died.connect(func(en: Enemy) -> void: enemy_killed.emit(en))
 	e.hit_castle.connect(func(d: int) -> void: castle_hit.emit(d))
 	enemies_node.add_child(e)

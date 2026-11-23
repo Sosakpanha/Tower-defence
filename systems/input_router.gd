@@ -10,6 +10,7 @@ signal build_requested(cell: Vector2i)
 signal tower_tapped(cell: Vector2i)
 signal sell_requested(cell: Vector2i)
 signal ground_tapped                  # tapped outside the grid
+signal aim_tapped(pos: Vector2)       # map tapped while an ability is armed (map-local position)
 
 const NONE := Vector2i(-1, -1)
 
@@ -18,6 +19,7 @@ var has_tower: Callable          # (Vector2i) -> bool
 var intercept: Callable          # (Vector2 world, int button) -> bool: true = press consumed
 var pending := NONE
 var enabled := true
+var aiming := false              # an ability is armed: the next left tap is its target
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -32,6 +34,9 @@ func _unhandled_input(event: InputEvent) -> void:
 ## `pos` is in viewport coordinates. Public so tests can call it directly.
 func handle_press(pos: Vector2, button: int, touch: bool) -> void:
 	var world := map.make_canvas_position_local(pos)
+	if aiming and button == MOUSE_BUTTON_LEFT:
+		aim_tapped.emit(world)
+		return
 	if intercept.is_valid() and intercept.call(world, button):   # e.g. hero tap-to-move
 		clear_pending()
 		return

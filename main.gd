@@ -25,7 +25,12 @@ var day := DayCycle.new()
 var day_banner := DayBanner.new()
 var hero_mgr := HeroManager.new()
 var hero_panel := HeroPanel.new()
-var build_kind := ""         # building type being placed; "" = placing a tower
+var abilities := Abilities.new()
+var ability_bar := AbilityBar.new()
+var aim_ring := AimRing.new()
+var planner := NightPlanner.new()
+var shake := ScreenShake.new()
+var build_kind := ""          # building type being placed; "" = placing a tower
 
 var towers: Dictionary:
 	get: return tower_mgr.towers
@@ -42,7 +47,7 @@ var wave_active: bool:
 func _ready() -> void:
 	Engine.time_scale = 1.0
 	preview.game = self
-	for n in [map, castle, preview, buildings, tower_mgr, enemies_node, projectiles_node, sfx, waves, day, day_banner, hud, build_menu, hero_mgr, hero_panel, router, lifecycle]:
+	for n in [map, castle, preview, buildings, tower_mgr, enemies_node, projectiles_node, sfx, waves, day, day_banner, hud, build_menu, hero_mgr, hero_panel, router, lifecycle, abilities, ability_bar, aim_ring, planner, shake]:
 		add_child(n)
 	hero_mgr.setup(projectiles_node, waves, day)
 	hero_mgr.changed.connect(func() -> void: hero_panel.set_info(hero_mgr.info()))
@@ -54,7 +59,9 @@ func _ready() -> void:
 	tower_mgr.setup(pathing, projectiles_node)
 	waves.setup(pathing, enemies_node)
 	buildings.setup(pathing)
+	planner.setup(day, self)    # before day.setup so it sees day 1
 	day.setup(waves)
+	_wire_abilities()
 	day.phase_changed.connect(day_banner.show_phase)
 	day.countdown.connect(day_banner.set_countdown)
 	day.night_requested.connect(start_wave)
@@ -89,6 +96,22 @@ func _ready() -> void:
 		SaveGame.restore(self, saved)
 	_select(selected)
 	_update_hud()
+
+
+func _wire_abilities() -> void:
+	abilities.waves = waves
+	shake.target = self
+	ability_bar.ability_pressed.connect(abilities.press)
+	router.aim_tapped.connect(abilities.aim_tap)
+	abilities.aim_changed.connect(func(k: String) -> void:
+		router.aiming = k != ""
+		ability_bar.set_aiming(k)
+		aim_ring.show_for(k))
+	abilities.cooldown.connect(ability_bar.set_cooldown)
+	abilities.cast.connect(func(k: String, pos: Vector2, r: float) -> void: AbilityFx.play(self, k, pos, r))
+	waves.boss_spawned.connect(func() -> void:
+		sfx.play_sfx("boss_horn", 0.0)
+		shake.shake(Config.BOSS_SHAKE, 1.2))
 
 
 func _select(kind: String) -> void:
@@ -135,7 +158,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_SPACE: start_wave()
 			KEY_F: cycle_speed()
 			KEY_U: upgrade_selected()
-			KEY_ESCAPE: deselect_tower()
+			KEY_Q: abilities.press("volley")
+			KEY_W: abilities.press("freeze")
+			KEY_ESCAPE: deselect_tower(); abilities.cancel_aim()
 			KEY_R: restart()
 
 
@@ -243,7 +268,7 @@ func _on_wave_started(_w: int) -> void:
 
 
 func _on_wave_cleared(w: int) -> void:
-	gold += 20 + w * 5
+	gold += 20 + w * 5 + WavePlan.clear_bonus(w)
 	tower_mgr.heal_all()
 	_update_hud()
 	autosave()
