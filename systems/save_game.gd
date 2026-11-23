@@ -33,9 +33,10 @@ static func take_pending() -> Dictionary:
 
 
 static func write(m: Node) -> void:
-	var d := {"version": VERSION, "gold": m.gold, "wave": m.waves.wave, "hp": m.castle.hp, "towers": [], "buildings": []}
+	var d := {"version": VERSION, "gold": m.gold, "wave": m.waves.wave, "hp": m.castle.hp, "towers": [], "buildings": [], "hero": m.hero_mgr.save_data()}
 	for c: Vector2i in m.tower_mgr.towers:
-		d.towers.append({"k": m.tower_mgr.towers[c].kind, "c": [c.x, c.y], "lv": m.tower_mgr.towers[c].level})
+		var t: Tower = m.tower_mgr.towers[c]
+		d.towers.append({"k": t.kind, "c": [c.x, c.y], "lv": t.level, "evo": t.evo})
 	for c: Vector2i in m.buildings.buildings:
 		d.buildings.append({"k": m.buildings.buildings[c].kind, "c": [c.x, c.y], "hp": m.buildings.buildings[c].hp})
 	var f := FileAccess.open(PATH, FileAccess.WRITE)
@@ -52,6 +53,9 @@ static func restore(m: Node, d: Dictionary) -> void:
 		m.tower_mgr.add(t.k, c)
 		for i in int(t.lv) - 1:
 			m.tower_mgr.towers[c].upgrade()
+		if Evolutions.has(t.k, t.get("evo", "")):
+			m.tower_mgr.towers[c].evolve(t.evo, Evolutions.cost(t.k))
+	m.hero_mgr.load_data(d.get("hero", {}))
 	for b: Dictionary in d.buildings:
 		var c := Vector2i(b.c[0], b.c[1])
 		m.buildings.add(b.k, c)

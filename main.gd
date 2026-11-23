@@ -23,7 +23,9 @@ var buildings := BuildingManager.new()
 var build_menu := BuildMenu.new()
 var day := DayCycle.new()
 var day_banner := DayBanner.new()
-var build_kind := ""          # building type being placed; "" = placing a tower
+var hero_mgr := HeroManager.new()
+var hero_panel := HeroPanel.new()
+var build_kind := ""         # building type being placed; "" = placing a tower
 
 var towers: Dictionary:
 	get: return tower_mgr.towers
@@ -40,8 +42,15 @@ var wave_active: bool:
 func _ready() -> void:
 	Engine.time_scale = 1.0
 	preview.game = self
-	for n in [map, castle, preview, buildings, tower_mgr, enemies_node, projectiles_node, sfx, waves, day, day_banner, hud, build_menu, router, lifecycle]:
+	for n in [map, castle, preview, buildings, tower_mgr, enemies_node, projectiles_node, sfx, waves, day, day_banner, hud, build_menu, hero_mgr, hero_panel, router, lifecycle]:
 		add_child(n)
+	hero_mgr.setup(projectiles_node, waves, day)
+	hero_mgr.changed.connect(func() -> void: hero_panel.set_info(hero_mgr.info()))
+	hero_panel.buy_pressed.connect(func(k: String) -> void: gold -= hero_mgr.try_buy(k, gold); _update_hud())
+	hero_panel.evolve_pressed.connect(func(id: String) -> void: gold -= hero_mgr.try_evolve(id, gold); _update_hud())
+	hero_panel.move_pressed.connect(hero_mgr.toggle_select)
+	router.intercept = hero_mgr.intercept
+	hud.evolve_pressed.connect(evolve_selected)
 	tower_mgr.setup(pathing, projectiles_node)
 	waves.setup(pathing, enemies_node)
 	buildings.setup(pathing)
@@ -100,6 +109,7 @@ func selected_cost() -> int:
 
 func _update_hud() -> void:
 	hud.set_stats(gold, lives, wave)
+	hero_panel.set_gold(gold)
 	build_menu.set_pop(buildings.pop_used(), buildings.pop_cap())
 	hud.set_wave_button_disabled(wave_active or game_over)
 	hud.set_speed(Config.SPEEDS[speed_idx])
@@ -200,6 +210,16 @@ func upgrade_selected() -> void:
 		return
 	gold -= cost
 	t.upgrade()
+	sfx.play_sfx("place", -2.0)
+	_update_hud()
+
+
+func evolve_selected(id: String) -> void:
+	var cost := tower_mgr.evolve_cost(sel_cell, id)
+	if game_over or cost < 0 or gold < cost:
+		return
+	gold -= cost
+	tower_mgr.evolve(sel_cell, id)
 	sfx.play_sfx("place", -2.0)
 	_update_hud()
 

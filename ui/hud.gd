@@ -8,6 +8,7 @@ signal start_wave_pressed
 signal speed_pressed
 signal upgrade_pressed
 signal sell_pressed
+signal evolve_pressed(id: String)
 signal pause_pressed
 signal restart_pressed
 signal menu_pressed
@@ -25,6 +26,7 @@ var tower_panel := PanelContainer.new()
 var panel_label := Label.new()
 var upgrade_btn := Button.new()
 var sell_btn := Button.new()
+var evolve_box := EvolveBox.new()
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS  # buttons keep working while the game is paused
@@ -63,16 +65,19 @@ func highlight_tower(kind: String) -> void:
 
 func show_tower_panel(t: Tower, gold: int) -> void:
 	tower_panel.visible = true
-	panel_label.text = "%s  Lv %d/%d\nDmg %d  Rng %d" % [t.stats.name, t.level, Tower.MAX_LEVEL, t.get_damage(), t.get_range()]
+	var title: String = t.stats.name if t.evo == "" else Evolutions.branches(t.kind)[t.evo].name
+	panel_label.text = "%s  Lv %d/%d\nDmg %d  Rng %d" % [title, t.level, Tower.MAX_LEVEL, t.get_damage(), t.get_range()]
 	var cost := t.upgrade_cost()
-	upgrade_btn.text = "MAX LEVEL" if cost < 0 else "Upgrade $%d" % cost
+	upgrade_btn.visible = t.evolve_cost() < 0 and t.evo == ""   # hidden once max level (evolve choices take over)
+	upgrade_btn.text = "Upgrade $%d" % cost
 	upgrade_btn.disabled = cost < 0 or gold < cost
+	evolve_box.show_for(t, gold)
 	sell_btn.text = "Sell +$%d" % t.sell_value()
 	tower_panel.reset_size()
 
 
 func move_tower_panel(pos: Vector2) -> void:
-	tower_panel.position = pos.clamp(Vector2(4, 84), Vector2(Config.SCREEN.x - 230, Config.SCREEN.y - 230))
+	tower_panel.position = pos.clamp(Vector2(4, 84), Vector2(Config.SCREEN.x - 330, Config.SCREEN.y - 330))
 
 
 func hide_tower_panel() -> void:
@@ -156,6 +161,8 @@ func _build_tower_panel() -> void:
 		b.custom_minimum_size = Vector2(200, 64)
 		UiStyle.style_button(b)
 		box.add_child(b)
+	box.add_child(evolve_box)
+	evolve_box.chosen.connect(evolve_pressed.emit)
 	upgrade_btn.pressed.connect(upgrade_pressed.emit)
 	sell_btn.pressed.connect(sell_pressed.emit)
 	add_child(tower_panel)

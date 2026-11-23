@@ -15,6 +15,7 @@ const NONE := Vector2i(-1, -1)
 
 var map: GameMap
 var has_tower: Callable          # (Vector2i) -> bool
+var intercept: Callable          # (Vector2 world, int button) -> bool: true = press consumed
 var pending := NONE
 var enabled := true
 
@@ -30,7 +31,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## `pos` is in viewport coordinates. Public so tests can call it directly.
 func handle_press(pos: Vector2, button: int, touch: bool) -> void:
-	var p := map.make_canvas_position_local(pos) - Config.ORIGIN
+	var world := map.make_canvas_position_local(pos)
+	if intercept.is_valid() and intercept.call(world, button):   # e.g. hero tap-to-move
+		clear_pending()
+		return
+	var p := world - Config.ORIGIN
 	var c := Vector2i(floori(p.x / Config.TILE), floori(p.y / Config.TILE))
 	if not Config.in_grid(c):
 		clear_pending()

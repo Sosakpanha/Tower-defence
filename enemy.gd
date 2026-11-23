@@ -162,7 +162,7 @@ func _attack_castle() -> void:
 
 ## Melee raiders stop and hit any tower within reach until it falls. True = busy attacking.
 func _attack_tower() -> bool:
-	var t := _nearest_target(radius + 44.0, ["towers"])
+	var t := _nearest_target(radius + 44.0, ["towers", "heroes"])
 	if t == null:
 		return false
 	if atk_cooldown <= 0.0:
@@ -193,7 +193,7 @@ func _nearest_target(reach: float, groups: Array) -> Node2D:
 func _shoot_nearby() -> void:
 	if atk_cooldown > 0.0:
 		return
-	var best := _nearest_target(atk_range, ["towers", "buildings"])
+	var best := _nearest_target(atk_range, ["towers", "buildings", "heroes"])
 	if best:
 		atk_cooldown = 1.5
 		best.take_damage(atk_damage)

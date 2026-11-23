@@ -43,11 +43,20 @@ func _process(delta: float) -> bool:
 			var g: int = m.gold
 			m.upgrade_selected(); m.upgrade_selected(); m.upgrade_selected()  # 3rd refused: max level
 			print("UPGRADE level=", m.towers[Vector2i(3, 1)].level, " spent_gold=", g - m.gold, " btn=", m.hud.upgrade_btn.text, " sell=", m.hud.sell_btn.text)
+			print("EVOLVE choices visible=", m.hud.evolve_box.visible, " ", m.hud.evolve_box._buttons.keys())
+			m.gold -= m.hero_mgr.try_buy("knight", m.gold)
+			m.hero_mgr.hero.position += Vector2(90, 80)
 			m.cycle_speed()
 			print("SPEED ", Engine.time_scale, " ", m.hud.speed_button.caption.text)
 			wait = 4; step = 1
 		1:
 			shot("01_upgrade_panel")
+			m.evolve_selected("ranger")
+			m.hero_mgr.kills = 20; m.hero_mgr.level = 3; m.hero_mgr.changed.emit()
+			print("EVOLVED evo=", m.towers[Vector2i(3, 1)].evo, " hero=", m.hero_mgr.info().name)
+			wait = 4; step = 11
+		11:
+			shot("01b_evolved_tower_and_hero")
 			m.cycle_speed(); m.cycle_speed()
 			m.deselect_tower()
 			m.start_wave()
