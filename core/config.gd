@@ -81,3 +81,6 @@ const ENEMY_CORNER_RADIUS := 26.0   # enemies cut path corners from this far awa
 const ENEMY_STRIDE := 15.0          # pixels walked per animation step (walk frame / squash)
 const ENEMY_DUST_MAX := 8           # max live dust puffs per enemy
 const ENEMY_DEATH_TIME := 0.4
+const HERO_PX := 62.0               # drawn height of a hero sprite (px)
+const HERO_STRIDE := 26.0           # pixels walked per hero animation step (4 frames = 2 steps)
+const HERO_ATTACK_POSE := 0.28      # seconds the attack frame is shown per hit

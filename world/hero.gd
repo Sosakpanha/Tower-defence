@@ -1,5 +1,5 @@
 ## The hero unit on the map: walks where told, auto-attacks enemies, has HP.
-## Stats come from core/heroes.gd; HeroManager owns level/kills/respawn. Drawn in code.
+## Stats come from core/heroes.gd; HeroManager owns level/kills/respawn. Look lives in HeroVisual (art in assets/art/gen/hero_*).
 class_name Hero
 extends Node2D
 
@@ -19,7 +19,8 @@ var selected := false
 var move_target := Vector2.INF
 var projectile_parent: Node
 var cooldown := 0.0
-var swing := 0.0
+var visual := HeroVisual.new()
+var _last_pos := Vector2.ZERO
 var _heal_t := 0.0
 
 
@@ -27,6 +28,9 @@ func setup(k: String, proj_parent: Node) -> void:
 	kind = k
 	projectile_parent = proj_parent
 	add_to_group("heroes")
+	visual.position.y = Config.HERO_PX * 0.4   # body centred on the hero position, feet below
+	add_child(visual)
+	_last_pos = position
 
 
 ## Recompute stats after a level-up/evolution; keeps the current HP fraction.
@@ -34,6 +38,7 @@ func apply(e: String, lv: int, full_heal: bool = false) -> void:
 	var frac := hp / max_hp
 	evo = e
 	level = lv
+	visual.set_art(evo if evo != "" else kind)
 	stats = Heroes.stats(kind, evo, lv)
 	max_hp = stats.hp
 	hp = max_hp if full_heal else max_hp * frac
@@ -52,7 +57,6 @@ func take_damage(amount: float) -> void:
 
 func _process(delta: float) -> void:
 	cooldown -= delta
-	swing = maxf(0.0, swing - delta * 5.0)
 	if stats.regen > 0.0 and hp < max_hp:
 		hp = minf(max_hp, hp + stats.regen * delta)
 	_heal_towers(delta)
@@ -68,6 +72,8 @@ func _process(delta: float) -> void:
 	if target and cooldown <= 0.0:
 		cooldown = stats.rate
 		_attack(target)
+	visual.advance(delta, position.distance_to(_last_pos), position.x - _last_pos.x)
+	_last_pos = position
 	queue_redraw()
 
 
@@ -91,8 +97,8 @@ func _nearest_enemy(reach: float) -> Enemy:
 
 
 func _attack(target: Enemy) -> void:
+	visual.attack(target.position.x - position.x)
 	if stats.melee:
-		swing = 1.0
 		target.take_damage(stats.dmg)
 		get_tree().call_group("sfx", "play_sfx", "hit", -8.0)
 		return
@@ -119,24 +125,16 @@ func _heal_towers(delta: float) -> void:
 
 
 func _draw() -> void:
-	var col: Color = stats.color
+	var feet := visual.position.y
 	if selected:
-		draw_arc(Vector2.ZERO, 26.0, 0, TAU, 32, Color(1, 1, 0.4, 0.9), 3.0)
+		draw_arc(Vector2(0, feet - 8.0), 26.0, 0, TAU, 32, Color(1, 1, 0.4, 0.9), 3.0)
 		if move_target != Vector2.INF:
 			draw_circle(move_target - position, 6.0, Color(1, 1, 0.4, 0.6))
-	draw_circle(Vector2(0, 4), 17.0, Color(0, 0, 0, 0.25))
-	draw_circle(Vector2.ZERO, 16.0, col)
-	draw_arc(Vector2.ZERO, 16.0, 0, TAU, 24, Color(0.15, 0.08, 0.02), 3.0)
-	if kind == "knight":   # sword, swings when attacking
-		var a := -0.8 + swing * 1.6
-		draw_line(Vector2.from_angle(a) * 8.0, Vector2.from_angle(a) * 28.0, Color(0.9, 0.9, 0.95), 4.0)
-		draw_rect(Rect2(-6, -6, 12, 12), Color(0.2, 0.2, 0.35, 0.8), false, 2.0)
-	else:                  # bow
-		draw_arc(Vector2(6, 0), 14.0, -1.2, 1.2, 12, Color(0.45, 0.28, 0.1), 3.0)
-		draw_line(Vector2(6 + cos(1.2) * 14.0, sin(-1.2) * 14.0), Vector2(6 + cos(1.2) * 14.0, sin(1.2) * 14.0), Color.WHITE, 1.0)
-	if evo != "":   # evolution badge
-		draw_circle(Vector2(-14, -16), 5.0, Color(1, 0.85, 0.2))
-	for i in level:
-		draw_circle(Vector2((i - (level - 1) / 2.0) * 8.0, 24.0), 2.5, Color(1.0, 0.85, 0.2))
-	draw_rect(Rect2(-22, -32, 44, 5), Color(0, 0, 0, 0.6))
-	draw_rect(Rect2(-22, -32, 44 * clampf(hp / max_hp, 0, 1), 5), Color.DEEP_SKY_BLUE)
+	# level badge under the feet (star ring once evolved)
+	var by := feet + 12.0
+	draw_circle(Vector2(0, by), 8.0, Color(0.15, 0.1, 0.05))
+	draw_circle(Vector2(0, by), 6.5, Color(1.0, 0.85, 0.2) if evo == "" else Color(1.0, 0.6, 0.15))
+	var font := ThemeDB.fallback_font
+	draw_string(font, Vector2(-4, by + 4.5), str(level), HORIZONTAL_ALIGNMENT_CENTER, 8.0, 12, Color(0.15, 0.08, 0.02))
+	draw_rect(Rect2(-22, feet - visual.height - 10.0, 44, 5), Color(0, 0, 0, 0.6))
+	draw_rect(Rect2(-22, feet - visual.height - 10.0, 44 * clampf(hp / max_hp, 0, 1), 5), Color.DEEP_SKY_BLUE)
