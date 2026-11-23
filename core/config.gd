@@ -75,3 +75,9 @@ const BOSS_FIRST_WAVE := 10          # earlier milestone waves get extra ogres i
 const BOSS_ESCORT_BASE := 4         # escort minions per boss, + wave/2
 const BOSS_BONUS_GOLD := 100        # +10 per wave on top, when a boss wave is cleared
 const BOSS_SHAKE := 14.0
+
+# Enemy motion / visuals
+const ENEMY_CORNER_RADIUS := 26.0   # enemies cut path corners from this far away
+const ENEMY_STRIDE := 15.0          # pixels walked per animation step (walk frame / squash)
+const ENEMY_DUST_MAX := 8           # max live dust puffs per enemy
+const ENEMY_DEATH_TIME := 0.4
