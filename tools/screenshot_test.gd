@@ -43,6 +43,12 @@ func _process(delta: float) -> bool:
 			m.upgrade_selected(); m.upgrade_selected(); m.upgrade_selected()  # 3rd refused: max level
 			print("UPGRADE level=", m.towers[Vector2i(3, 1)].level, " spent_gold=", g - m.gold, " btn=", m.hud.upgrade_btn.text, " sell=", m.hud.sell_btn.text)
 			print("EVOLVE choices visible=", m.hud.evolve_box.visible, " ", m.hud.evolve_box._buttons.keys())
+			m.hero_panel._on_chip()   # recruit popover
+			wait = 4; step = 20
+		20:
+			shot("00_recruit_popover")
+			print("RECRUIT popover visible=", m.hero_panel.pop.visible, " chip=", m.hero_panel.chip.get_global_rect())
+			m.hero_panel._on_chip()
 			m.gold -= m.hero_mgr.try_buy("knight", m.gold)
 			m.hero_mgr.hero.position += Vector2(90, 80)
 			m.flow.cycle_speed()
@@ -53,6 +59,7 @@ func _process(delta: float) -> bool:
 			m.evolve_selected("ranger")
 			m.hero_mgr.kills = 20; m.hero_mgr.level = 3; m.hero_mgr.changed.emit()
 			print("EVOLVED evo=", m.towers[Vector2i(3, 1)].evo, " hero=", m.hero_mgr.info().name)
+			print("EVOLVE popover visible=", m.hero_panel.pop.visible, " rect=", m.hero_panel.pop.get_global_rect())
 			wait = 4; step = 11
 		11:
 			shot("01b_evolved_tower_and_hero")
@@ -75,11 +82,31 @@ func _process(delta: float) -> bool:
 			wait = 6; step = 4
 		4:
 			shot("03_ability_cast")
-			m.waves.wave = 4      # pretend the next night is wave 5: a boss wave
-			m.planner._on_phase(false, 5)
-			print("PLAN w5 ", WaveManager.describe(5), " portals=", WavePlan.portal_names(5))
+			m.waves.wave = 9      # pretend the next night is wave 10: a boss wave
+			m.planner._on_phase(false, 10)
+			print("PLAN w5 ", WaveManager.describe(10), " portals=", WavePlan.portal_names(10))
 			wait = 6; step = 5
 		5:
 			shot("04_boss_warning")
+			m.hero_panel.pop.closed.emit()   # dismiss the evolve popover
+			print("POPOVER dismissed visible=", m.hero_panel.pop.visible)
+			m.planner._on_phase(true, 10)
+			for e in m.enemies_node.get_children():
+				e.queue_free()
+			var boss := Enemy.new()
+			boss.setup(m.pathing, WavePlan.spawn_cell(10, 0), "boss", 10)
+			m.enemies_node.add_child(boss)
+			boss.position = Vector2(300, 260)
+			boss.hp = boss.max_hp * 0.6
+			wait = 8; step = 6
+		6:
+			shot("05_boss_night")
+			var far := Enemy.new()
+			far.setup(m.pathing, WavePlan.spawn_cell(10, 0), "boss", 10)
+			m.enemies_node.add_child(far)
+			far.position = Vector2(-60, 400)
+			wait = 6; step = 7
+		7:
+			shot("06_boss_offscreen")
 			return true
 	return false
