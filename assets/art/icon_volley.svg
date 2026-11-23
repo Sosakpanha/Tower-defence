@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<defs><g id="a" stroke="#3b2410" stroke-width="2" stroke-linejoin="round">
+<path d="M32 8 L32 50" stroke="#e8d6a8" stroke-width="4"/><path d="M32 3 L38 14 L26 14 Z" fill="#c9d3dc"/>
+<path d="M32 52 L38 60 M32 52 L26 60 M32 46 L38 54 M32 46 L26 54" stroke="#d9534f" stroke-width="3"/></g></defs>
+<use href="#a" transform="translate(-14 6) rotate(20 32 32)"/>
+<use href="#a" transform="translate(14 -2) rotate(20 32 32)"/>
+<use href="#a" transform="rotate(20 32 32)"/>
+</svg>

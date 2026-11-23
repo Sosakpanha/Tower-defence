@@ -4,7 +4,8 @@ class_name Sfx
 extends Node
 
 const NAMES := ["shoot_gunner", "shoot_sniper", "shoot_frost", "hit", "enemy_die",
-	"place", "sell", "leak", "wave_start", "win", "lose"]
+	"place", "sell", "leak", "wave_start", "win", "lose",
+	"ability_volley", "ability_freeze", "boss_horn"]
 const POOL_SIZE := 16
 
 var streams := {}

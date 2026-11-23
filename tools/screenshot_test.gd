@@ -60,5 +60,19 @@ func _process(delta: float) -> bool:
 		3:
 			shot("02_wave_in_progress")
 			print("STATE gold=", m.gold, " lives=", m.lives, " enemies=", m.enemies_node.get_child_count())
+			m.abilities.press("freeze")
+			m.abilities.press("volley")
+			var e0 = m.enemies_node.get_child(0)
+			m.abilities.aim_tap(e0.position)
+			print("ABILITY freeze_cd=", m.abilities.cd.freeze, " volley_cd=", m.abilities.cd.volley)
+			wait = 6; step = 4
+		4:
+			shot("03_ability_cast")
+			m.waves.wave = 4      # pretend the next night is wave 5: a boss wave
+			m.planner._on_phase(false, 5)
+			print("PLAN w5 ", WaveManager.describe(5), " portals=", WavePlan.portal_names(5))
+			wait = 6; step = 5
+		5:
+			shot("04_boss_warning")
 			return true
 	return false

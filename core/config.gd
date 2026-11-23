@@ -47,3 +47,10 @@ static func is_jungle(c: Vector2i) -> bool:
 
 static func is_castle(c: Vector2i) -> bool:
 	return CASTLE_RECT.has_point(c)
+
+# Wave plan, boss waves and abilities (see systems/wave_plan.gd, systems/abilities.gd).
+const WAVE_SEED := 20260
+const BOSS_EVERY := 5
+const BOSS_ESCORT_BASE := 4         # escort minions per boss, + wave/2
+const BOSS_BONUS_GOLD := 100        # +10 per wave on top, when a boss wave is cleared
+const BOSS_SHAKE := 14.0
