@@ -12,7 +12,7 @@ var pathing := Pathing.new()
 var preview := PlacementPreview.new()
 var tower_mgr := TowerManager.new()
 var enemies_node := Node2D.new()
-var projectiles_node := Node2D.new()
+var projectiles_node := Node2D.new()   # also the home of effect sprites (group fx_root)
 var sfx := Sfx.new()
 var waves := WaveManager.new()
 var hud := Hud.new()
@@ -55,6 +55,7 @@ func _ready() -> void:
 	preview.game = self
 	for n in [map, castle, preview, buildings, tower_mgr, enemies_node, projectiles_node, sfx, waves, day, day_banner, boss_marker, hud, build_menu, hero_mgr, router, lifecycle, abilities, ability_bar, aim_ring, planner, hero_panel, shake, keys, flow, rules, hero_wiring, ability_wiring]:
 		add_child(n)
+	projectiles_node.add_to_group("fx_root")
 	hero_mgr.setup(projectiles_node, waves, day)
 	hero_wiring.spent.connect(func(n: int) -> void: gold -= n; _update_hud())
 	rules.setup(pathing, func() -> Dictionary: return towers, buildings)

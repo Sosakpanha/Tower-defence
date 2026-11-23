@@ -63,6 +63,8 @@ func _process(_delta: float) -> bool:
 			phase = 1
 		1:
 			for e in m.enemies_node.get_children():
+				if not e is Enemy:
+					continue
 				if not seen.has(e):
 					seen[e] = true
 					spawn_cells.append(Config.world_to_cell(e.position))
@@ -80,7 +82,8 @@ func _process(_delta: float) -> bool:
 			var ab: Abilities = m.abilities
 			var hp0 := 0.0
 			for e in m.enemies_node.get_children():
-				hp0 += e.hp
+				if e is Enemy:
+					hp0 += e.hp
 			check(ab.is_ready("freeze"), "freeze ready")
 			ab.press("freeze")
 			check(not ab.is_ready("freeze"), "freeze on cooldown after use")

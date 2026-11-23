@@ -76,7 +76,7 @@ func _process(delta: float) -> bool:
 			print("STATE gold=", m.gold, " lives=", m.lives, " enemies=", m.enemies_node.get_child_count())
 			m.abilities.press("freeze")
 			m.abilities.press("volley")
-			var e0 = m.enemies_node.get_child(0)
+			var e0: Node2D = get_nodes_in_group("enemies")[0]
 			m.abilities.aim_tap(e0.position)
 			print("ABILITY freeze_cd=", m.abilities.cd.freeze, " volley_cd=", m.abilities.cd.volley)
 			wait = 6; step = 4

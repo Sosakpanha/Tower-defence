@@ -107,6 +107,7 @@ func hit_spark() -> void:
 	FxSprite.play(_fx_parent(), "hit", global_position + Vector2(0, -height * 0.5), _radius * 2.2, 24.0, Color(1, 1, 1, 0.9))
 
 
-## Effects live next to the enemy (the enemy node itself may be freed first).
+## Effects live in the shared fx root, never in the enemy container (it may be freed first).
 func _fx_parent() -> Node:
-	return get_parent().get_parent() if get_parent() else null
+	var root := get_tree().get_first_node_in_group("fx_root") if is_inside_tree() else null
+	return root if root else (get_parent().get_parent() if get_parent() else null)
