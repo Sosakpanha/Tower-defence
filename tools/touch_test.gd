@@ -71,7 +71,7 @@ func _process(_d: float) -> bool:
 			m.lifecycle.backgrounded.emit(); wait = 2; step = 9
 		9:
 			ok("backgrounding pauses", paused)
-			m.set_paused(false)
+			m.flow.set_paused(false)
 			m._end_game(); wait = 3; step = 10
 		10:
 			shot("touch_04_gameover")

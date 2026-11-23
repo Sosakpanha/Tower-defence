@@ -38,7 +38,6 @@ func _process(delta: float) -> bool:
 			m._select_building("wall"); m.try_place(Vector2i(4, 4)); m.try_place(Vector2i(4, 5))
 			print("BUILDINGS count=", m.buildings.buildings.size(), " pop=", m.buildings.pop_used(), "/", m.buildings.pop_cap())
 			m._select("gunner")
-			print("PREVIEW ", m.hud.preview_label.text)
 			m.select_tower(Vector2i(3, 1))
 			var g: int = m.gold
 			m.upgrade_selected(); m.upgrade_selected(); m.upgrade_selected()  # 3rd refused: max level
@@ -46,7 +45,7 @@ func _process(delta: float) -> bool:
 			print("EVOLVE choices visible=", m.hud.evolve_box.visible, " ", m.hud.evolve_box._buttons.keys())
 			m.gold -= m.hero_mgr.try_buy("knight", m.gold)
 			m.hero_mgr.hero.position += Vector2(90, 80)
-			m.cycle_speed()
+			m.flow.cycle_speed()
 			print("SPEED ", Engine.time_scale, " ", m.hud.speed_button.caption.text)
 			wait = 4; step = 1
 		1:
@@ -57,10 +56,9 @@ func _process(delta: float) -> bool:
 			wait = 4; step = 11
 		11:
 			shot("01b_evolved_tower_and_hero")
-			m.cycle_speed(); m.cycle_speed()
+			m.flow.cycle_speed(); m.flow.cycle_speed()
 			m.deselect_tower()
 			m.start_wave()
-			print("PREVIEW(active) ", m.hud.preview_label.text)
 			step = 2
 		2:
 			sim_time += delta

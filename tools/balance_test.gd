@@ -44,10 +44,10 @@ func _try_step() -> bool:
 	match parts[0]:
 		"t":
 			m._select(parts[1]); m.try_place(_cell(parts[2]))
-			return m.gold < g or not m.can_build(_cell(parts[2]))  # skip cells that can never be built
+			return m.gold < g or not m.rules.can_build(_cell(parts[2]))  # skip cells that can never be built
 		"b":
 			m._select_building(parts[1]); m.try_place(_cell(parts[2]))
-			return m.buildings.has(_cell(parts[2])) or not m.can_build(_cell(parts[2])) or not m.buildings.can_afford_pop(parts[1])
+			return m.buildings.has(_cell(parts[2])) or not m.rules.can_build(_cell(parts[2])) or not m.buildings.can_afford_pop(parts[1])
 		"u":
 			var c := _cell(parts[1])
 			if not m.towers.has(c):

@@ -20,7 +20,6 @@ var pause_button := IconButton.new()
 var gold_label := Label.new()
 var lives_label := Label.new()
 var wave_label := Label.new()
-var preview_label := Label.new()
 var overlay := OverlayPanel.new()
 var tower_panel := PanelContainer.new()
 var panel_label := Label.new()
@@ -49,10 +48,6 @@ func set_wave_button_disabled(disabled: bool) -> void:
 
 func set_speed(multiplier: float) -> void:
 	speed_button.caption.text = "x%d" % int(multiplier)
-
-
-func set_preview(text: String) -> void:
-	preview_label.text = text
 
 
 func highlight_tower(kind: String) -> void:
@@ -137,10 +132,6 @@ func _build_stats() -> void:
 		lbl.custom_minimum_size = Vector2(54 if lbl != wave_label else 100, 0)
 		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		info.add_child(lbl)
-	preview_label.position = Vector2(940, 54)
-	preview_label.add_theme_font_size_override("font_size", 14)
-	preview_label.add_theme_color_override("font_color", Color(1, 0.93, 0.75))
-	add_child(preview_label)
 
 
 func _build_tower_panel() -> void:

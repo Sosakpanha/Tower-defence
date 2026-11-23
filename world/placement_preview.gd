@@ -20,7 +20,7 @@ func _draw() -> void:
 	if not Config.in_grid(c):
 		return
 	var cost: int = game.selected_cost()
-	var ok: bool = game.can_build(c) and game.gold >= cost
+	var ok: bool = game.rules.can_build(c) and game.gold >= cost
 	var r: Rect2 = game.map.cell_rect(c)
 	draw_texture_rect(TEX_MARKER, r, false, Color(1, 1, 1, 0.7))
 	draw_rect(r, Color(0, 1, 0, 0.25) if ok else Color(1, 0, 0, 0.35))
