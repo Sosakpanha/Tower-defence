@@ -93,6 +93,7 @@ func take_damage(amount: float, slow: float = 0.0) -> void:
 		died.emit(self)
 		_become_corpse.call_deferred()
 	else:
+		visual.hit_spark()
 		queue_redraw()
 
 

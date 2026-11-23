@@ -6,7 +6,7 @@ extends SceneTree
 
 const TOL := 0.13       # colour distance from the background that still counts as background
 const MIN_AREA := 600   # ignore specks smaller than this (px)
-const MERGE := 14       # boxes closer than this belong to the same sprite
+const MERGE := 14       # boxes closer than this belong to the same sprite (env SLICE_MERGE overrides)
 
 
 func _init() -> void:
@@ -64,12 +64,13 @@ func _init() -> void:
 			if n >= MIN_AREA:
 				boxes.append(Rect2i(r.position, r.size + Vector2i.ONE))
 				areas.append(n)
+	var merge_px := int(OS.get_environment("SLICE_MERGE")) if OS.has_environment("SLICE_MERGE") else MERGE
 	var merged := true
 	while merged:   # join parts of one sprite (detached barrels, banners ...)
 		merged = false
 		for i in boxes.size():
 			for j in range(i + 1, boxes.size()):
-				if boxes[i].grow(MERGE).intersects(boxes[j]):
+				if boxes[i].grow(merge_px).intersects(boxes[j]):
 					boxes[i] = boxes[i].merge(boxes[j])
 					boxes.remove_at(j)
 					merged = true

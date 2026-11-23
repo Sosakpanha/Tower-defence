@@ -24,6 +24,7 @@ var day := DayCycle.new()
 var day_banner := DayBanner.new()
 var hero_mgr := HeroManager.new()
 var hero_panel := HeroPanel.new()
+var boss_marker := BossMarker.new()
 var abilities := Abilities.new()
 var ability_bar := AbilityBar.new()
 var aim_ring := AimRing.new()
@@ -52,7 +53,7 @@ var wave_active: bool:
 func _ready() -> void:
 	Engine.time_scale = 1.0
 	preview.game = self
-	for n in [map, castle, preview, buildings, tower_mgr, enemies_node, projectiles_node, sfx, waves, day, day_banner, hud, build_menu, hero_mgr, hero_panel, router, lifecycle, abilities, ability_bar, aim_ring, planner, shake, keys, flow, rules, hero_wiring, ability_wiring]:
+	for n in [map, castle, preview, buildings, tower_mgr, enemies_node, projectiles_node, sfx, waves, day, day_banner, boss_marker, hud, build_menu, hero_mgr, router, lifecycle, abilities, ability_bar, aim_ring, planner, hero_panel, shake, keys, flow, rules, hero_wiring, ability_wiring]:
 		add_child(n)
 	hero_mgr.setup(projectiles_node, waves, day)
 	hero_wiring.spent.connect(func(n: int) -> void: gold -= n; _update_hud())

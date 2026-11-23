@@ -15,8 +15,8 @@ func _ready() -> void:
 	sb.set_corner_radius_all(8)
 	sb.content_margin_left = 12
 	sb.content_margin_right = 12
-	sb.content_margin_top = 4
-	sb.content_margin_bottom = 4
+	sb.content_margin_top = 2
+	sb.content_margin_bottom = 2
 	panel.add_theme_stylebox_override("panel", sb)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -45,7 +45,7 @@ func show_plan(wave: int, counts: Dictionary, portal_names: Array[String], boss:
 	_label("from " + ", ".join(portal_names), Color(1.0, 0.6, 0.5))
 	panel.visible = true
 	panel.reset_size()
-	panel.position = Vector2((Config.SCREEN.x - panel.size.x) / 2.0, 88.0)
+	panel.position = Vector2((Config.SCREEN.x - panel.size.x) / 2.0, 83.0)
 
 
 func hide_plan() -> void:
