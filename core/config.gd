@@ -52,3 +52,9 @@ static func is_castle(c: Vector2i) -> bool:
 const HERO_SPAWN_CELL := Vector2i(10, 6)   # just below the castle
 const HERO_RESPAWN := 30.0                 # seconds dead (or until dawn)
 const HERO_XP_RADIUS := 260.0              # kills this close to the hero give it XP
+
+# Enemy motion / visuals
+const ENEMY_CORNER_RADIUS := 26.0   # enemies cut path corners from this far away
+const ENEMY_STRIDE := 15.0          # pixels walked per animation step (walk frame / squash)
+const ENEMY_DUST_MAX := 8           # max live dust puffs per enemy
+const ENEMY_DEATH_TIME := 0.4
