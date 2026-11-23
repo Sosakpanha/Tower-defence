@@ -18,7 +18,7 @@ var _phase := randf() * 4.0       # grows by 1 per step walked
 var _amp := 0.0                   # 0 standing .. 1 walking, eased
 var _dir := Vector2.RIGHT         # smoothed travel direction
 var _facing := 1.0                # +1 right, -1 left
-var _puffs: Array = []            # [world_pos, age, size]
+var _next_hit_fx := 0.0           # msec timestamp: rate-limits hit sparks
 var _radius := 16.0
 
 
@@ -26,7 +26,7 @@ func setup(kind: String, px: float) -> void:
 	_radius = px * 0.35
 	frames = EnemyFrames.new(kind)
 	tint = frames.tint
-	stride = Config.ENEMY_STRIDE * _radius / 16.0
+	stride = Config.ENEMY_STRIDE * Config.ENEMY_STRIDE_MULT.get(kind, 1.0) * _radius / 16.0
 	var tex_size := frames.textures[0].get_size()
 	var sc := px / maxf(tex_size.x, tex_size.y)
 	sprite.texture = frames.textures[0]
@@ -67,8 +67,8 @@ func advance(delta: float, moved: float, dir: Vector2, speed_mult: float) -> voi
 			_facing = 1.0 if _dir.x > 0.0 else -1.0
 		var before := floorf(_phase)
 		_phase += moved / stride
-		if floorf(_phase) != before:
-			_spawn_puff()
+		if floorf(_phase) != before and int(_phase) % 2 == 0:
+			FxSprite.play(_fx_parent(), "dust", global_position + Vector2(0, 1) - _dir * _radius * 0.4, _radius * 2.4, 12.0, Color(1, 1, 1, 0.6))
 	sprite.flip_h = _facing < 0.0
 	sprite.modulate = tint * (Color(0.6, 0.9, 1.0) if speed_mult < 1.0 else Color.WHITE)
 	if frames.walk:
@@ -88,10 +88,9 @@ func lunge(dir: Vector2) -> void:
 	t.tween_property(body, "position", Vector2.ZERO, 0.14)
 
 
-## Fade, shrink and burst into dust. Returns the tween; free the owner when it finishes.
+## Fade, shrink and burst into a death puff. Returns the tween; free the owner when it finishes.
 func play_death() -> Tween:
-	for i in 5:
-		_spawn_puff(Vector2(randf_range(-1, 1), randf_range(-0.4, 0.2)) * _radius * 0.8, 1.4)
+	FxSprite.play(_fx_parent(), "death", global_position + Vector2(0, -height * 0.4), _radius * 4.0, 12.0)
 	var t := create_tween().set_parallel(true)
 	t.tween_property(body, "scale", Vector2(1.1, 0.8), Config.ENEMY_DEATH_TIME)
 	t.tween_property(body, "modulate:a", 0.0, Config.ENEMY_DEATH_TIME)
@@ -99,25 +98,15 @@ func play_death() -> Tween:
 	return t
 
 
-func _spawn_puff(offset := Vector2.ZERO, size_mult := 1.0) -> void:
-	if _puffs.size() >= Config.ENEMY_DUST_MAX:
-		_puffs.pop_front()
-	var back := -_dir * _radius * 0.3 if offset == Vector2.ZERO else Vector2.ZERO
-	var jitter := Vector2(randf_range(-2, 2), randf_range(-1, 1))
-	_puffs.append([global_position + back + offset + jitter, 0.0, _radius * 0.2 * size_mult * randf_range(0.8, 1.2)])
-
-
-func _process(delta: float) -> void:
-	if _puffs.is_empty():
+## Hit spark on the body, at most once per Config.FX_HIT_INTERVAL.
+func hit_spark() -> void:
+	var now := Time.get_ticks_msec()
+	if now < _next_hit_fx:
 		return
-	for p in _puffs:
-		p[1] += delta
-		p[0].y -= 8.0 * delta
-	_puffs = _puffs.filter(func(p: Array) -> bool: return p[1] < 0.5)
-	queue_redraw()
+	_next_hit_fx = now + Config.FX_HIT_INTERVAL * 1000.0
+	FxSprite.play(_fx_parent(), "hit", global_position + Vector2(0, -height * 0.5), _radius * 2.2, 24.0, Color(1, 1, 1, 0.9))
 
 
-func _draw() -> void:
-	for p in _puffs:
-		var t: float = p[1] / 0.5
-		draw_circle(to_local(p[0]), p[2] * (1.0 + t), Color(0.78, 0.7, 0.55, 0.4 * (1.0 - t)))
+## Effects live next to the enemy (the enemy node itself may be freed first).
+func _fx_parent() -> Node:
+	return get_parent().get_parent() if get_parent() else null

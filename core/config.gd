@@ -79,5 +79,7 @@ const BOSS_SHAKE := 14.0
 # Enemy motion / visuals
 const ENEMY_CORNER_RADIUS := 26.0   # enemies cut path corners from this far away
 const ENEMY_STRIDE := 15.0          # pixels walked per animation step (walk frame / squash)
-const ENEMY_DUST_MAX := 8           # max live dust puffs per enemy
+# Per-kind multiplier on the stride (bigger = slower leg cycle), tuned with tools/walk_capture_test.gd
+const ENEMY_STRIDE_MULT := {"normal": 1.0, "archer": 1.0, "fast": 1.5, "swarm": 1.8, "tank": 0.85, "boss": 0.55}
+const FX_HIT_INTERVAL := 0.12       # min seconds between hit sparks on one enemy
 const ENEMY_DEATH_TIME := 0.4
