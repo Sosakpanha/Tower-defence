@@ -131,6 +131,7 @@ func _process(delta: float) -> void:
 			p.chain = Evolutions.mod(kind, evo, "chain", 0)
 			p.color = stats.color
 			recoil = 5.0
+			FxSprite.play(projectile_parent, "hit", p.position, 26.0, 40.0, stats.color.lightened(0.5))
 			p.texture = load("res://assets/art/proj_%s.svg" % kind)
 			projectile_parent.add_child(p)
 			get_tree().call_group("sfx", "play_sfx", "shoot_" + kind, -9.0)
