@@ -34,6 +34,7 @@ var flow := GameFlow.new()
 var rules := BuildRules.new()
 var hero_wiring := HeroWiring.new()
 var ability_wiring := AbilityWiring.new()
+var _hp_at_night := Config.CASTLE_HP  # castle HP when the wave began (flawless-bonus check)
 var build_kind := ""          # building type being placed; "" = placing a tower
 
 var towers: Dictionary:
@@ -129,6 +130,7 @@ func _update_hud() -> void:
 	hud.set_stats(gold, lives, wave)
 	hero_panel.set_gold(gold)
 	build_menu.set_pop(buildings.pop_used(), buildings.pop_cap())
+	build_menu.set_income(buildings.income_per_sec())
 	hud.set_wave_button_disabled(wave_active or game_over)
 	_refresh_tower_panel()
 
@@ -205,12 +207,15 @@ func start_wave() -> void:
 
 
 func _on_wave_started(_w: int) -> void:
+	_hp_at_night = castle.hp
 	sfx.play_sfx("wave_start", -3.0)
 	_update_hud()
 
 
 func _on_wave_cleared(w: int) -> void:
-	gold += 20 + w * 5 + WavePlan.clear_bonus(w)
+	var bonus := Economy.clear_bonus(w, castle.hp >= _hp_at_night) + WavePlan.clear_bonus(w)
+	gold += bonus
+	FloatText.spawn(self, Config.cell_center(Vector2i(Config.CASTLE_RECT.position)), "+%d" % bonus)
 	tower_mgr.heal_all()
 	_update_hud()
 	autosave()

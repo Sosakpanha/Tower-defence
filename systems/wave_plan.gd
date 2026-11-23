@@ -5,7 +5,7 @@ extends RefCounted
 
 
 static func is_boss(w: int) -> bool:
-	return w > 0 and w % Config.BOSS_EVERY == 0
+	return w >= Config.BOSS_FIRST_WAVE and w % Config.BOSS_EVERY == 0
 
 
 ## Spawn cells used by wave `w` (1-2 early, more later; boss waves use at least 2).

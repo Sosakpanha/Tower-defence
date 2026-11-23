@@ -8,7 +8,7 @@ const ROWS := 10
 const ORIGIN := Vector2(0, 80)  # leave room for the HUD bar on top
 const SCREEN := Vector2(1280, 720)
 
-const START_GOLD := 250
+const START_GOLD := 300
 const CASTLE_HP := 200
 const TOWER_HP := 150.0           # level 1; x1.5 / x2 on upgrade
 const CASTLE_DMG_FACTOR := 0.5    # castle damage per second = enemy attack x this
@@ -16,6 +16,21 @@ const SELL_REFUND := 0.7
 const FIRST_DAY_SECONDS := 45.0  # build time before wave 1
 const DAY_SECONDS := 30.0        # build time between later waves
 const BASE_POP := 4  # population cap before any House
+
+# Difficulty curve (see WaveManager.wave_list and Enemy.setup). Per-wave scaling of every enemy.
+const ENEMY_HP_LIN := 0.45       # hp x (1 + w*LIN + w*w*QUAD)
+const ENEMY_HP_QUAD := 0.025
+const ENEMY_ATK_PER_WAVE := 0.08
+const ENEMY_REWARD_PER_WAVE := 0.04
+const WAVE_COUNT_BASE := 3       # enemies in a wave: BASE + w*LIN + w*w*QUAD
+const WAVE_COUNT_LIN := 1.5
+const WAVE_COUNT_QUAD := 0.08
+
+# Day-end rewards (paid when a wave is cleared). Surviving without castle damage pays extra.
+const CLEAR_BONUS_BASE := 25
+const CLEAR_BONUS_PER_WAVE := 5
+const FLAWLESS_BONUS_BASE := 15
+const FLAWLESS_BONUS_PER_WAVE := 5
 
 const SPEEDS := [1.0, 2.0, 3.0]
 const KIND_NAMES := {"normal": "Goblin", "fast": "Wolf", "tank": "Ogre", "archer": "Archer", "swarm": "Rat", "boss": "Warlord"}
@@ -56,6 +71,7 @@ const HERO_XP_RADIUS := 260.0              # kills this close to the hero give i
 # Wave plan, boss waves and abilities (see systems/wave_plan.gd, systems/abilities.gd).
 const WAVE_SEED := 20260
 const BOSS_EVERY := 5
+const BOSS_FIRST_WAVE := 10          # earlier milestone waves get extra ogres instead
 const BOSS_ESCORT_BASE := 4         # escort minions per boss, + wave/2
 const BOSS_BONUS_GOLD := 100        # +10 per wave on top, when a boss wave is cleared
 const BOSS_SHAKE := 14.0

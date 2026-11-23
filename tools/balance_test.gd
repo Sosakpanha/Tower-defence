@@ -1,9 +1,11 @@
 # Usage: Godot --headless --path . --fixed-fps 60 --script tools/balance_test.gd
 # A simple scripted "player" follows a fixed build order, then prints gold / castle HP per wave.
+# Pass `-- noeco` to skip all farm/lumber/house steps (economy value check).
 # Tune Config / Buildings.TYPES / WaveManager.wave_list so this bot wins narrowly, not trivially.
 extends SceneTree
 
 const SIM_SPEED := 4.0
+const GREEDY_KINDS := ["sniper", "gunner", "cannon", "frost", "sniper", "gunner"]
 const IDLE_BEFORE_WAVE := 30.0  # seconds of build time the bot takes between waves
 
 # Build order. "t:type:x,y" tower, "b:type:x,y" building, "u:x,y" upgrade tower.
@@ -40,6 +42,8 @@ func _cell(s: String) -> Vector2i:
 
 func _try_step() -> bool:
 	var parts: PackedStringArray = ORDER[step].split(":")
+	if parts[0] == "b" and "noeco" in OS.get_cmdline_user_args() and parts[1] != "wall":
+		return true
 	var g: int = m.gold
 	match parts[0]:
 		"t":
@@ -57,6 +61,38 @@ func _try_step() -> bool:
 	return true
 
 
+## After the scripted order: keep spending like a sensible player (upgrade first, then new towers near the castle).
+func _greedy() -> void:
+	for _i in 6:
+		var best: Tower = null
+		for t: Tower in m.towers.values():
+			if t.level < 3 and (best == null or t.level < best.level):
+				best = t
+		if best != null and best.upgrade_cost() <= m.gold:
+			m.select_tower(Vector2i(Config.world_to_cell(best.position))); m.upgrade_selected()
+			continue
+		var kind: String = GREEDY_KINDS[m.towers.size() % GREEDY_KINDS.size()]
+		if m.gold < Tower.TYPES[kind].cost:
+			return
+		var cells := _free_cells()
+		if cells.is_empty():
+			return
+		m._select(kind); m.try_place(cells[0])
+
+
+## Buildable cells, nearest to the castle first.
+func _free_cells() -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	var mid := Vector2(Config.CASTLE_RECT.position) + Vector2(Config.CASTLE_RECT.size) / 2.0
+	for x in Config.COLS:
+		for y in Config.ROWS:
+			if m.can_build(Vector2i(x, y)):
+				out.append(Vector2i(x, y))
+	out.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return (Vector2(a) + Vector2(0.5, 0.5)).distance_to(mid) < (Vector2(b) + Vector2(0.5, 0.5)).distance_to(mid))
+	return out
+
+
 func _process(delta: float) -> bool:
 	frame += 1
 	if frame == 2:
@@ -70,8 +106,10 @@ func _process(delta: float) -> bool:
 		return m.game_over
 	while step < ORDER.size() and _try_step():
 		step += 1
+	if step >= ORDER.size():
+		_greedy()
 	for i in mini(step, ORDER.size()):  # rebuild economy buildings that raiders destroyed
-		if ORDER[i].begins_with("b:"):
+		if ORDER[i].begins_with("b:") and not "noeco" in OS.get_cmdline_user_args():
 			var p: PackedStringArray = ORDER[i].split(":")
 			if not m.buildings.has(_cell(p[2])):
 				m._select_building(p[1]); m.try_place(_cell(p[2]))

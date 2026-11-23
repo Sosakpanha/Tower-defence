@@ -32,6 +32,10 @@ func pop_cap() -> int:
 	return n
 
 
+func income_per_sec() -> float:
+	return Economy.income_per_sec(buildings.values())
+
+
 func can_afford_pop(kind: String) -> bool:
 	return pop_used() + Buildings.TYPES[kind].pop_use <= pop_cap()
 

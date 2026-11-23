@@ -58,7 +58,7 @@ func _process(_delta: float) -> bool:
 			Engine.time_scale = 8.0
 			m.castle.hp = 1000000
 			m.day.enabled = false
-			m.waves.wave = 4   # next wave = 5, a boss wave with escorts
+			m.waves.wave = 9   # next wave = 10, the first boss wave (with escorts)
 			m.waves.start()
 			phase = 1
 		1:
@@ -69,12 +69,12 @@ func _process(_delta: float) -> bool:
 					spawn_kinds.append(e.kind)
 			if not m.waves.queue.is_empty():
 				return false
-			var n := WavePlan.kinds(5).size()
+			var n := WavePlan.kinds(10).size()
 			var ok_cells := spawn_cells.size() == n
 			for i in mini(n, spawn_cells.size()):
-				ok_cells = ok_cells and spawn_cells[i] == WavePlan.spawn_cell(5, i)
-			check(ok_cells, "live wave 5: every enemy spawned at its planned portal (%d enemies)" % n)
-			check(spawn_kinds == WavePlan.kinds(5), "live wave 5: kinds/order match the plan")
+				ok_cells = ok_cells and spawn_cells[i] == WavePlan.spawn_cell(10, i)
+			check(ok_cells, "live wave 10: every enemy spawned at its planned portal (%d enemies)" % n)
+			check(spawn_kinds == WavePlan.kinds(10), "live wave 10: kinds/order match the plan")
 			phase = 2
 		2:
 			var ab: Abilities = m.abilities
